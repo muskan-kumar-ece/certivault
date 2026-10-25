@@ -1,9 +1,9 @@
 # Progress Log: CertiVault
 
-## Current: Work 2 — Foundation (database, auth, organizations, app shell) (COMPLETED)
+## Current: Work 4 — Design system and app shell (Apple-style feel) (COMPLETED)
 Status: done
-Branch: work-2/foundation
-Tag: work-2-done
+Branch: work-4/design-system
+Tag: work-4-done
 
 ---
 
@@ -21,57 +21,60 @@ Tag: work-2-done
 
 ---
 
-### Done in Work 2
-- [x] Drafted initial foundation migration `supabase/migrations/20261025000001_foundation.sql`:
-  - Extensions: `pgcrypto`, `pg_trgm`
-  - Enum: `org_role ('owner', 'admin', 'issuer', 'viewer')`
-  - 6 initial tables: `orgs`, `org_members`, `invitations`, `signatories`, `platform_admins`, `audit_logs`
-  - Security Definer helper functions: `is_member(_org uuid)`, `has_role(_org uuid, _roles org_role[])`
-- [x] Audited migration via `db-security-reviewer` subagent:
-  - Identified & resolved SQL scope shadowing bug in `org_members` delete policy.
-  - Added last-owner demotion protection in `org_members` update policy.
-  - Restricted invitation updates to owner/admin to prevent role escalation.
-  - Hardened audit log insert policy to enforce `actor_id = auth.uid()` and organization membership.
-  - Added unique index on `invitations.token_hash`.
-- [x] Implemented server authority helpers in `src/server/auth.ts`:
-  - `requireUser()`: strictly enforces authenticated session.
-  - `requireRole(orgId, allowedRoles)`: verifies server-side membership and RBAC.
-  - `audit(orgId, action, meta)`: records immutable audit trail using admin service-role client.
-- [x] Created Zod validation schemas in `src/lib/schemas/org.ts` (`createOrgSchema`, `updateOrgSchema`).
-- [x] Built server actions in `src/features/org/actions.ts` (`createOrganizationAction`, `getUserOrganizationsAction`).
-- [x] Implemented authentication server actions in `src/features/auth/actions.ts` (Email OTP, Verify OTP, Google OAuth, Sign Out).
-- [x] Configured session refresh and route protection in `middleware.ts` (protects `/app`, `/admin`, `/onboarding`).
-- [x] Built Auth callback route handler in `src/app/auth/callback/route.ts`.
-- [x] Created interactive `/login` page with 6-digit OTP code input and Google sign-in.
-- [x] Created 2-step `/onboarding` wizard for organization creation.
-- [x] Created authenticated app shell in `src/app/(app)/app/layout.tsx` featuring dynamic `OrgSwitcher`.
-- [x] Created Home dashboard view in `src/app/(app)/app/page.tsx` displaying live org balance and quick actions.
-- [x] Verified builds and tests:
-  - `npm test`: 7/7 unit tests passing
-  - `npm run typecheck`: clean (0 errors)
-  - `npm run build`: 10 static and dynamic routes compiled successfully
-- [x] Created commit `9537f32` and git tag `work-2-done`.
+### Done in Work 4
+- [x] Implemented complete reusable UI component suite in `src/components/ui/` with zero hex colors (strict CSS variables & `src/lib/tokens.ts`):
+  - `button.tsx`: 5 variants, 3 sizes, loading state, touch target expansion, 44px minimum target
+  - `icon-button.tsx`: accessible `aria-label` enforcement, 44x44px target
+  - `segmented-control.tsx`: iOS-style sliding pill with Framer Motion spring physics, scoped `layoutId`
+  - `field.tsx`: input with linked `aria-invalid` / `aria-describedby` error associations, >=16px text
+  - `select.tsx`: accessible Radix UI select primitive supporting both `onChange` and `onValueChange`
+  - `combobox.tsx`: cmdk + Radix Popover searchable select
+  - `file-drop-zone.tsx`: drag & drop zone with client-side 5MB validation and full keyboard accessibility (`tabIndex={0}`, Enter/Space)
+  - `stepper.tsx`: responsive step flow indicator with 44px touch targets
+  - `sheet.tsx`: Vaul bottom drawer with grab handle, velocity dismiss, and background scale
+  - `dialog.tsx`: desktop Radix modal with 44x44px close button and accessible titles
+  - `toast.tsx`: floating Apple-style notification pill with auto-dismiss and spring enter/exit
+  - `skeleton.tsx`: shimmer pulse loading placeholder
+  - `empty-state.tsx`: zero-data state card with icon, message, and CTA
+  - `badge.tsx`: status chips (verified, warning, danger, neutral, accent)
+  - `progress-ring.tsx`: circular SVG progress ring & progress bar with full `role="progressbar"` ARIA attributes
+  - `list-row.tsx`: interactive list rows with press feedback and keyboard activation
+  - `large-title-header.tsx`: iOS-style 34px/41px bold header with optional back navigation
+  - `tab-bar.tsx`: mobile bottom translucent floating bar (`backdrop-blur-xl`, `h-[calc(4rem+env(safe-area-inset-bottom))]`, `aria-current="page"`)
+  - `sidebar.tsx`: desktop sticky navigation (`100dvh`, Org switcher, ⌘K trigger, credit balance widget)
+  - `command-palette.tsx`: cmdk ⌘K modal with global shortcut and navigation actions
+  - `app-shell.tsx`: responsive layout coordinator switching between `TabBar` (mobile) and `Sidebar` (desktop)
+  - `page-transition.tsx`: shared-axis page transition respecting `prefers-reduced-motion`
+  - `motion.ts`: shared spring constants and `usePressMotion()` helper
+- [x] Built dev showcase page at `/dev/ui` with interactive component demonstrations and light/dark theme toggle.
+- [x] Integrated design system into app shell (`src/app/(app)/app/layout.tsx`), sign-in (`/login`), and onboarding (`/onboarding`).
+- [x] Documented all 22 components and their prop APIs in `src/components/ui/README.md`.
+- [x] Audited via `ui-reviewer` subagent: resolved all touch targets (<44px), keyboard navigation, ARIA attributes, and reduced motion fallbacks.
+- [x] Verification suite passing:
+  - `npm run guard`: 4/4 checks passed (secrets isolation, RLS, tokens only, allowlist)
+  - `npm run lint`: 0 errors
+  - `npm run typecheck`: 0 errors
+  - `npm test`: 14/14 tests passed
+  - `npm run build`: Production build succeeded; all 11 routes prerendered cleanly.
 
 ---
 
-### Decisions
-- 2026-10-25: Aliased subqueries in `org_members` RLS policies (`m.org_id = org_members.org_id`) to prevent cross-organization owner counting bugs identified during subagent review.
-- 2026-10-25: Configured passwordless Email OTP as primary auth path with optional Google OAuth.
-
----
-
-### Exit gate — Work 2
-- [x] Migration SQL created with strict RLS on all 6 tables
-- [x] db-security-reviewer audit passed
-- [x] Auth callback and middleware operational
-- [x] Org creation server actions and Zod schemas tested
-- [x] Production build passes cleanly
-- [x] Tag created: `work-2-done`
+### Exit gate — Work 4
+- [x] All UI primitives created in `src/components/ui` matching `PRD.md` §11 and `implementation.md` §2
+- [x] `usePressMotion` helper and spring constants implemented and respecting `prefers-reduced-motion`
+- [x] Touch targets ≥ 44×44px across all controls
+- [x] Responsive app shell (TabBar on mobile, Sidebar on desktop, safe areas respected)
+- [x] `/dev/ui` showcase page created with light/dark theme switcher
+- [x] `ui-reviewer` subagent audit completed and remediations verified
+- [x] `npm run guard && npm run lint && npm run typecheck && npm test && npm run build` green
+- [x] Tag created: `work-4-done`
 
 ---
 
 ### Next
-- Next step is **WORK 3: ARCHITECTURE LOCK (freeze the foundations)**:
-  - Create `ARCHITECTURE_LOCK.md` containing frozen stack versions, schema contracts, security rules, module interface stubs, ID formats, and job payloads.
-  - Implement module interface stubs (`renderCertificate`, `sendEmail`, `enqueueJob`, `applyCreditDelta`, `createOrder`, `buildExport`).
-  - Add CI guard scripts (grep checks for secret leaks, hex colors outside tokens, tables without RLS, allowlist dependencies).
+- Next step is **WORK 5: Organization, team, and settings**:
+  - Organization settings screen (`name`, `logo`, `color`, `sender_name`, `reply_to`, `retention_setting`)
+  - Signatories CRUD (name, title, signature image upload with validation)
+  - Team screen: list, invite by email (hashed token, expires), accept flow, role changes, remove (with last-owner demotion protection)
+  - Storage bucket `branding` + RLS policies and upload helper with image re-encode
+  - Audit log writes for role changes, invites, and settings modifications.

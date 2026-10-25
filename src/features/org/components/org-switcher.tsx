@@ -77,7 +77,7 @@ export function OrgSwitcher({ organizations, currentOrgId }: OrgSwitcherProps) {
               >
                 <div className="flex items-center gap-2 truncate">
                   <span className="truncate">{item.org.name}</span>
-                  <span className="text-[10px] uppercase px-1 py-0.2 rounded border bg-canvas text-ink-secondary">
+                  <span className="text-[10px] uppercase px-1 py-0.5 rounded border bg-canvas text-ink-secondary">
                     {item.role}
                   </span>
                 </div>

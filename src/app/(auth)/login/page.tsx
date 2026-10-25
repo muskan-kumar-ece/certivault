@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { sendOtpAction, verifyOtpAction } from "@/features/auth/actions";
 import { createClient } from "@/lib/supabase/browser";
+import { Button } from "@/components/ui/button";
+import { Field } from "@/components/ui/field";
+import { ShieldCheck } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -59,81 +62,67 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-6 bg-canvas">
-      <div className="w-full max-w-sm p-8 bg-surface rounded-card border shadow-sm space-y-6">
+    <div className="flex min-h-screen flex-1 flex-col items-center justify-center bg-canvas p-6">
+      <div className="w-full max-w-sm space-y-6 rounded-2xl border border-hairline bg-surface p-8 shadow-sm">
         <div className="space-y-1 text-center">
-          <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-accent/10 text-accent mb-2">
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-              />
-            </svg>
+          <div className="mb-2 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/10 text-accent">
+            <ShieldCheck className="h-6 w-6" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-ink">
-            {step === "email" ? "Sign in to CertiVault" : "Enter Verification Code"}
+            {step === "email" ? "Sign in to CertiVault" : "Enter Security Code"}
           </h1>
           <p className="text-sm text-ink-secondary">
             {step === "email"
-              ? "Passwordless access for university, college, and club teams."
+              ? "Passwordless access for college, exam cell, and student club teams."
               : `We sent a 6-digit code to ${email}`}
           </p>
         </div>
 
         {error && (
-          <div className="p-3 rounded-control bg-danger/10 border border-danger/20 text-danger text-sm">
+          <div className="rounded-xl border border-danger/20 bg-danger/10 p-3 text-sm text-danger" role="alert">
             {error}
           </div>
         )}
 
         {step === "email" ? (
           <form onSubmit={handleSendOtp} className="space-y-4">
-            <div className="space-y-1.5">
-              <label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-ink-secondary">
-                Work Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                autoFocus
-                placeholder="name@college.edu"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-control bg-canvas border text-ink text-base focus:outline-none focus:ring-2 focus:ring-accent"
-              />
-            </div>
+            <Field
+              label="Work or College Email"
+              type="email"
+              required
+              autoFocus
+              placeholder="name@college.edu"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
-            <button
+            <Button
               type="submit"
-              disabled={loading}
-              className="w-full py-2.5 rounded-control bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-medium press-feedback shadow-sm"
+              variant="primary"
+              size="md"
+              loading={loading}
+              className="w-full"
             >
-              {loading ? "Sending Code..." : "Continue with Email"}
-            </button>
+              Continue with Email
+            </Button>
 
             <div className="relative py-2">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <span className="w-full border-t border-hairline" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-surface px-2 text-ink-secondary">Or</span>
               </div>
             </div>
 
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              size="md"
               onClick={handleGoogleSignIn}
-              className="w-full py-2.5 rounded-control bg-surface hover:bg-surface-raised border text-ink font-medium press-feedback flex items-center justify-center gap-2"
+              className="w-full"
             >
-              <svg className="w-4 h-4" viewBox="0 0 24 24">
+              <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -151,44 +140,44 @@ export default function LoginPage() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                 />
               </svg>
-              <span>Continue with Google</span>
-            </button>
+              Continue with Google
+            </Button>
           </form>
         ) : (
           <form onSubmit={handleVerifyOtp} className="space-y-4">
-            <div className="space-y-1.5">
-              <label htmlFor="otp" className="text-xs font-semibold uppercase tracking-wider text-ink-secondary">
-                6-Digit Security Code
-              </label>
-              <input
-                id="otp"
-                type="text"
-                required
-                autoFocus
-                maxLength={6}
-                autoComplete="one-time-code"
-                placeholder="123456"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                className="w-full px-3.5 py-3 rounded-control bg-canvas border text-ink font-mono text-xl tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-accent"
-              />
-            </div>
+            <Field
+              label="6-Digit Code"
+              type="text"
+              required
+              autoFocus
+              maxLength={6}
+              autoComplete="one-time-code"
+              placeholder="123456"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="text-center font-mono text-xl tracking-widest"
+            />
 
-            <button
+            <Button
               type="submit"
-              disabled={loading || otp.length < 6}
-              className="w-full py-2.5 rounded-control bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-medium press-feedback shadow-sm"
+              variant="primary"
+              size="md"
+              loading={loading}
+              disabled={otp.length < 6}
+              className="w-full"
             >
-              {loading ? "Verifying..." : "Verify & Sign In"}
-            </button>
+              Verify & Sign In
+            </Button>
 
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              size="sm"
               onClick={() => setStep("email")}
-              className="w-full text-center text-sm text-ink-secondary hover:text-ink pt-2"
+              className="w-full"
             >
               ← Use a different email
-            </button>
+            </Button>
           </form>
         )}
       </div>
