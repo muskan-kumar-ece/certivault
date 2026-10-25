@@ -1,9 +1,9 @@
 # Progress Log: CertiVault
 
-## Current: Work 4 — Design system and app shell (Apple-style feel) (COMPLETED)
+## Current: Work 5 — Organization, team, and settings (COMPLETED)
 Status: done
-Branch: work-4/design-system
-Tag: work-4-done
+Branch: work-5/org-and-team
+Tag: work-5-done
 
 ---
 
@@ -21,60 +21,55 @@ Tag: work-4-done
 
 ---
 
-### Done in Work 4
-- [x] Implemented complete reusable UI component suite in `src/components/ui/` with zero hex colors (strict CSS variables & `src/lib/tokens.ts`):
-  - `button.tsx`: 5 variants, 3 sizes, loading state, touch target expansion, 44px minimum target
-  - `icon-button.tsx`: accessible `aria-label` enforcement, 44x44px target
-  - `segmented-control.tsx`: iOS-style sliding pill with Framer Motion spring physics, scoped `layoutId`
-  - `field.tsx`: input with linked `aria-invalid` / `aria-describedby` error associations, >=16px text
-  - `select.tsx`: accessible Radix UI select primitive supporting both `onChange` and `onValueChange`
-  - `combobox.tsx`: cmdk + Radix Popover searchable select
-  - `file-drop-zone.tsx`: drag & drop zone with client-side 5MB validation and full keyboard accessibility (`tabIndex={0}`, Enter/Space)
-  - `stepper.tsx`: responsive step flow indicator with 44px touch targets
-  - `sheet.tsx`: Vaul bottom drawer with grab handle, velocity dismiss, and background scale
-  - `dialog.tsx`: desktop Radix modal with 44x44px close button and accessible titles
-  - `toast.tsx`: floating Apple-style notification pill with auto-dismiss and spring enter/exit
-  - `skeleton.tsx`: shimmer pulse loading placeholder
-  - `empty-state.tsx`: zero-data state card with icon, message, and CTA
-  - `badge.tsx`: status chips (verified, warning, danger, neutral, accent)
-  - `progress-ring.tsx`: circular SVG progress ring & progress bar with full `role="progressbar"` ARIA attributes
-  - `list-row.tsx`: interactive list rows with press feedback and keyboard activation
-  - `large-title-header.tsx`: iOS-style 34px/41px bold header with optional back navigation
-  - `tab-bar.tsx`: mobile bottom translucent floating bar (`backdrop-blur-xl`, `h-[calc(4rem+env(safe-area-inset-bottom))]`, `aria-current="page"`)
-  - `sidebar.tsx`: desktop sticky navigation (`100dvh`, Org switcher, ⌘K trigger, credit balance widget)
-  - `command-palette.tsx`: cmdk ⌘K modal with global shortcut and navigation actions
-  - `app-shell.tsx`: responsive layout coordinator switching between `TabBar` (mobile) and `Sidebar` (desktop)
-  - `page-transition.tsx`: shared-axis page transition respecting `prefers-reduced-motion`
-  - `motion.ts`: shared spring constants and `usePressMotion()` helper
-- [x] Built dev showcase page at `/dev/ui` with interactive component demonstrations and light/dark theme toggle.
-- [x] Integrated design system into app shell (`src/app/(app)/app/layout.tsx`), sign-in (`/login`), and onboarding (`/onboarding`).
-- [x] Documented all 22 components and their prop APIs in `src/components/ui/README.md`.
-- [x] Audited via `ui-reviewer` subagent: resolved all touch targets (<44px), keyboard navigation, ARIA attributes, and reduced motion fallbacks.
-- [x] Verification suite passing:
+### Done in Work 5
+- [x] Database & Storage Migration `supabase/migrations/20261025000002_branding_storage.sql`:
+  - Created private `branding` storage bucket (5MB limit, PNG/JPG/WebP/SVG allowlist).
+  - Configured tenant-isolated storage RLS policies for `select`, `insert`, `update`, and `delete`.
+  - Audited by `db-security-reviewer` subagent: implemented safe `org_id::text = (storage.foldername(name))[1]` avoiding uncaught SQL exceptions (22P02) on malformed paths, added explicit `WITH CHECK` on update, and idempotent `DROP POLICY IF EXISTS`.
+- [x] Storage upload & URL helpers in `src/server/branding.ts` (`uploadBrandingAsset`, `getBrandingAssetUrl`).
+- [x] Zod validation schemas:
+  - `src/lib/schemas/settings.ts` (`updateOrgSettingsSchema`)
+  - `src/lib/schemas/signatory.ts` (`createSignatorySchema`, `updateSignatorySchema`)
+  - `src/lib/schemas/team.ts` (`inviteMemberSchema`, `updateMemberRoleSchema`, `removeMemberSchema`)
+- [x] Server Actions:
+  - `src/features/settings/actions.ts`: `updateOrgSettingsAction`, `getOrgSettingsAction`
+  - `src/features/signatories/actions.ts`: `listSignatoriesAction`, `createSignatoryAction`, `updateSignatoryAction`, `deleteSignatoryAction`
+  - `src/features/team/actions.ts`: `listTeamMembersAction`, `inviteMemberAction` (crypto sha256 tokens, 7-day expiry, `sendEmail` stub call), `acceptInvitationAction`, `updateMemberRoleAction`, `removeMemberAction`
+  - Enforced server authority (`requireRole`), full audit logging (`audit`), and sole-owner protection (cannot demote or remove the last owner).
+- [x] UI Pages & Client Views:
+  - `/app/settings`: Organization profile, brand accent color picker, email sender name, reply-to, DPDP-aligned retention settings, and full Signatories CRUD with dialog.
+  - `/app/team`: Active member list with role dropdowns, pending invitations, and teammate invite modal.
+  - `/invite/[token]`: Public invitation acceptance page with session detection and automated redirect.
+- [x] Automated Unit & Integration Tests in `src/test/team-and-settings.test.ts` (10 tests; total test suite 24/24 passing).
+- [x] Verification Suite Passing:
   - `npm run guard`: 4/4 checks passed (secrets isolation, RLS, tokens only, allowlist)
   - `npm run lint`: 0 errors
   - `npm run typecheck`: 0 errors
-  - `npm test`: 14/14 tests passed
-  - `npm run build`: Production build succeeded; all 11 routes prerendered cleanly.
+  - `npm test`: 24/24 tests passed
+  - `npm run build`: Production build succeeded; all 13 routes prerendered cleanly.
 
 ---
 
-### Exit gate — Work 4
-- [x] All UI primitives created in `src/components/ui` matching `PRD.md` §11 and `implementation.md` §2
-- [x] `usePressMotion` helper and spring constants implemented and respecting `prefers-reduced-motion`
-- [x] Touch targets ≥ 44×44px across all controls
-- [x] Responsive app shell (TabBar on mobile, Sidebar on desktop, safe areas respected)
-- [x] `/dev/ui` showcase page created with light/dark theme switcher
-- [x] `ui-reviewer` subagent audit completed and remediations verified
-- [x] `npm run guard && npm run lint && npm run typecheck && npm test && npm run build` green
-- [x] Tag created: `work-4-done`
+### Exit gate — Work 5
+- [x] Organization settings screen live at `/app/settings`
+- [x] Signatories CRUD operational with audit logs
+- [x] Team screen live at `/app/team` with email invitations and role switching
+- [x] Sole-owner protection enforced in server actions and verified by tests
+- [x] Private `branding` storage bucket and RLS policies audited and applied
+- [x] All 24 unit/integration tests green
+- [x] Production build passes cleanly with 0 errors
+- [x] Tag created: `work-5-done`
 
 ---
 
 ### Next
-- Next step is **WORK 5: Organization, team, and settings**:
-  - Organization settings screen (`name`, `logo`, `color`, `sender_name`, `reply_to`, `retention_setting`)
-  - Signatories CRUD (name, title, signature image upload with validation)
-  - Team screen: list, invite by email (hashed token, expires), accept flow, role changes, remove (with last-owner demotion protection)
-  - Storage bucket `branding` + RLS policies and upload helper with image re-encode
-  - Audit log writes for role changes, invites, and settings modifications.
+- Next step is **WORK 6: Templates and the PDF engine**:
+  - `templates` table migration with RLS + tests (presets with `org_id is null`)
+  - Buckets `templates` for backgrounds (PNG/JPG/PDF first page ≤ 5 MB)
+  - Bundle fonts in `public/fonts` (Inter, Playfair Display, Noto Sans Devanagari, Noto Sans Telugu)
+  - Implement server `renderCertificate()` using pdfme/pdf-lib
+  - Implement Crockford Base32 `newPublicId()` with collision/uniqueness tests
+  - 8 preset templates + thumbnails seed migration
+  - Template library screen `/app/templates` (grid, search, duplicate, archive)
+  - Template editor with embedded pdfme designer, inspector, and autosave
+  - `scripts/benchmark-pdf.ts` (render 500 certificates, report ms each and file size).
