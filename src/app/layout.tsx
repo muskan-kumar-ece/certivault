@@ -6,6 +6,16 @@ export const metadata: Metadata = {
   title: "CertiVault — Verifiable Certificates at Scale",
   description:
     "Issue 1,000 verified certificates in 5 minutes. Anyone can check them in 5 seconds.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "CertiVault",
+  },
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export const viewport: Viewport = {

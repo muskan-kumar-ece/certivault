@@ -66,3 +66,42 @@ export async function audit(
     meta,
   });
 }
+
+/**
+ * Checks whether a user is a platform administrator.
+ */
+export async function isPlatformAdmin(userId?: string): Promise<boolean> {
+  const admin = adminClient();
+  let id = userId;
+  if (!id) {
+    try {
+      const user = await requireUser();
+      id = user.id;
+    } catch {
+      return false;
+    }
+  }
+
+  const { data, error } = await admin
+    .from("platform_admins")
+    .select("user_id")
+    .eq("user_id", id)
+    .single();
+
+  return !error && !!data;
+}
+
+/**
+ * Requires the authenticated user to be a platform administrator.
+ * Throws a forbidden error if the user is not in the platform_admins table.
+ */
+export async function requirePlatformAdmin() {
+  const user = await requireUser();
+  const isAdmin = await isPlatformAdmin(user.id);
+
+  if (!isAdmin) {
+    throw new Error("Forbidden: Platform administrator access required.");
+  }
+
+  return user;
+}

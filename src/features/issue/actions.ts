@@ -23,6 +23,17 @@ export async function saveDraftBatchAction(rawInput: SaveDraftBatchInput) {
   const { user } = await requireRole(input.orgId, ["owner", "admin", "issuer"]);
   const supabase = await createClient();
 
+  // Verify org is not suspended
+  const { data: orgCheck } = await supabase
+    .from("orgs")
+    .select("suspended_at")
+    .eq("id", input.orgId)
+    .single();
+
+  if (orgCheck?.suspended_at) {
+    throw new Error("This organization is suspended. Creating or editing batches is disabled.");
+  }
+
   // Verify template exists
   const { data: template, error: tplError } = await supabase
     .from("templates")
@@ -170,15 +181,19 @@ export async function issueBatchAction(rawInput: IssueBatchInput) {
     throw new Error("Batch must contain at least 1 recipient before issuing.");
   }
 
-  // 2. Check organization credits
+  // 2. Check organization credits and suspension status
   const { data: org, error: orgError } = await supabase
     .from("orgs")
-    .select("credit_balance")
+    .select("credit_balance, suspended_at")
     .eq("id", input.orgId)
     .single();
 
   if (orgError || !org) {
     throw new Error("Organization profile not found.");
+  }
+
+  if (org.suspended_at) {
+    throw new Error("This organization is suspended. Issuing certificates is disabled.");
   }
 
   if (org.credit_balance < batch.total) {
@@ -269,12 +284,16 @@ export async function sendTestCertificateAction(rawInput: SendTestCertificateInp
 
   const { data: org, error: orgError } = await supabase
     .from("orgs")
-    .select("name, logo_path")
+    .select("name, logo_path, suspended_at")
     .eq("id", input.orgId)
     .single();
 
   if (orgError || !org) {
     throw new Error("Organization not found.");
+  }
+
+  if (org.suspended_at) {
+    throw new Error("This organization is suspended. Sending test certificates is disabled.");
   }
 
   const testPublicId = newPublicId();

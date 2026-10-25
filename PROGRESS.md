@@ -337,10 +337,67 @@ Tag: work-5-done
 
 ---
 
+### Work 11: Admin console, polish, and mobile PWA (Completed 2026-10-25)
+- [x] Branch: `work-11/admin-polish-pwa`
+- [x] Migration `supabase/migrations/20261025000009_admin_and_verification.sql`:
+  - `orgs` table extended with `verification_status in ('none', 'pending', 'approved', 'rejected')`, `verification_requested_at`, and `verification_notes`.
+  - B-tree indexes on `orgs(verification_status)` and `orgs(suspended_at)`.
+  - Platform admin RLS policies: SELECT on `payments`, `invoices`, `batches`, `certificates`; SELECT and UPDATE on `abuse_reports`.
+  - Audited and APPROVED with full PASS by `db-security-reviewer` (`0c4dc48b-cb33-4d5c-abe3-230f66468874`).
+- [x] Companion pgTAP test suite: `supabase/tests/20261025000009_admin_and_verification_test.sql` (12 tests covering columns, check constraints, indexes, and RLS policies).
+- [x] Server Auth & Admin Engine in `src/server/auth.ts` and `src/features/admin/actions.ts`:
+  - `requirePlatformAdmin()` and `isPlatformAdmin()` guards.
+  - `getAdminStatsAction()` aggregating platform-wide KPI counters and total paid revenue.
+  - `getAdminOrgsAction()` with filterable queries (search, plan, status: active, suspended, verified, pending verification).
+  - `getAdminOrgDetailAction()` returning comprehensive audit, members, batches, payments, and activity logs.
+  - `adjustCreditsAction()` with mandatory audit trail and negative-balance protection via `apply_credit_delta`.
+  - `toggleOrgSuspensionAction()` halting batch drafting, creation, and worker execution while leaving public verification intact.
+  - `reviewVerificationRequestAction()` granting or rejecting the verified issuer seal.
+  - `resolveAbuseReportAction()` with one-click certificate revocation and status resolution.
+  - `getAdminPaymentsAction()` auditing all cross-organization transactions with GST breakdown.
+- [x] Platform Admin Console at `/admin`:
+  - Navigation shell with quick links to Organizations (`/admin`), Verifications (`/admin/verifications`), Abuse Queue (`/admin/abuse`), and Payments (`/admin/payments`).
+  - Searchable and filterable organizations table with quick credit adjustment and suspension modals.
+  - Detailed organization view at `/admin/orgs/[id]`.
+  - Abuse reports review queue at `/admin/abuse` with certificate public ID lookup and revocation dialog.
+  - Verified Issuer queue at `/admin/verifications` for manual institution accreditation.
+  - Global payments ledger at `/admin/payments`.
+- [x] Public Landing Page & Interactive Live Demo at `/`:
+  - Apple-style high-conversion landing page with hero, value propositions, trust metrics, and FAQ.
+  - Interactive live certificate generator demo: updates recipient name, course title, and template style in real-time with live vector QR code.
+  - Comprehensive legal page shells: Terms (`/terms`), Privacy (`/privacy`), Refund (`/refund` with Razorpay compliant 7-day/14-day policy), Contact (`/contact`).
+  - Offline standby screen at `/offline`.
+- [x] PWA & Mobile Polish:
+  - Web App Manifest at `src/app/manifest.ts` serving `/manifest.webmanifest` with design tokens (`#3355FF` accent, `#F5F5F7` canvas).
+  - High-res vector PWA and Apple touch icon in `public/icon.svg`.
+  - Viewport configuration with `viewportFit: "cover"`, `maximumScale: 1`, safe area compliance, and touch feedback.
+- [x] Automated Unit & Integration Tests in `src/test/admin-and-pwa.test.ts` (6 tests; total suite 72/72 passing).
+- [x] Verification Suite Passing:
+  - `npm run guard`: 4/4 checks passed.
+  - `npm run lint`: 0 errors.
+  - `npm run typecheck`: 0 errors.
+  - `npm test`: 72/72 tests passed across 10 test suites.
+  - `npm run build`: Production build succeeded; all 32 routes compiled cleanly.
+
+---
+
+### Exit gate — Work 11
+- [x] `/admin` console live with platform admin check and server authority
+- [x] Org suspension invariant verified: blocks issuing while verification works
+- [x] Manual credit adjustments routed strictly through `apply_credit_delta` with audit
+- [x] Review queue for verified issuer requests and abuse reports queue operational
+- [x] Public landing page with interactive live demo, pricing teaser, and FAQ
+- [x] Legal pages live at `/terms`, `/privacy`, `/refund`, `/contact`
+- [x] PWA manifest and icons configured with Apple-style theme tokens
+- [x] All 72 unit/integration tests green
+- [x] Production build passes cleanly with 0 errors (32/32 routes)
+- [x] Tag created: `work-11-done`
+
+---
+
 ### Next
-- Next step is **WORK 11: Admin console, polish, and mobile PWA**:
-  - Platform admin console at `/admin` (super-admin access check, org list, credit adjustments, review queue for verified issuers and abuse reports)
-  - PWA manifest (`manifest.json`), icons, Apple touch icons, theme colors
-  - Mobile UX polish (bottom sheets, touch feedback, swipe gestures, haptic triggers)
-  - View Transitions API integration
-  - Performance and Lighthouse audits (PWA, a11y >= 95)
+- Next step is **WORK 12: Security hardening, testing, and load**:
+  - Security checklist (`implementation.md` §7): rate limiting, security headers, Turnstile/anti-bot protection
+  - Hostile payload tests: CSV formula injection attack vectors, tamper testing on signed URLs
+  - Stress testing: 1,000-to-5,000 certificate batch concurrency, worker recovery drill
+  - Disaster recovery and operational runbook

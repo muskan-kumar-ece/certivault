@@ -98,5 +98,49 @@ export async function getOrgSettingsAction(orgId: string) {
     creditBalance: org.credit_balance,
     plan: org.plan,
     verified: org.verified,
+    verificationStatus: org.verification_status || "none",
   };
+}
+
+/**
+ * Submits a request for the Verified Issuer badge for manual review by platform administrators.
+ * Requires role: 'owner' or 'admin'.
+ */
+export async function requestVerificationBadgeAction(orgId: string) {
+  await requireRole(orgId, ["owner", "admin"]);
+  const supabase = await createClient();
+
+  const { data: org, error: fetchErr } = await supabase
+    .from("orgs")
+    .select("verification_status, verified")
+    .eq("id", orgId)
+    .single();
+
+  if (fetchErr || !org) {
+    throw new Error("Organization not found.");
+  }
+
+  if (org.verified) {
+    throw new Error("Organization is already verified.");
+  }
+
+  if (org.verification_status === "pending") {
+    throw new Error("A verification request is already pending review.");
+  }
+
+  const { error: updateErr } = await supabase
+    .from("orgs")
+    .update({
+      verification_status: "pending",
+      verification_requested_at: new Date().toISOString(),
+    })
+    .eq("id", orgId);
+
+  if (updateErr) {
+    throw new Error(`Failed to submit verification request: ${updateErr.message}`);
+  }
+
+  await audit(orgId, "org.verification_requested", "org", orgId);
+  revalidatePath("/app/account/organization");
+  return { success: true };
 }
