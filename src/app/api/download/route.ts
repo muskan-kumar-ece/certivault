@@ -1,8 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminClient } from "@/server/admin";
 import { getSignedUrl } from "@/server/storage";
+import { checkDownloadRateLimit } from "@/server/rate-limit";
 
 export async function GET(req: NextRequest) {
+  const clientIp =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
+  const rateLimit = checkDownloadRateLimit(clientIp);
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many download requests. Please try again in one minute." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": "60",
+          "X-RateLimit-Limit": "60",
+          "X-RateLimit-Remaining": "0",
+        },
+      }
+    );
+  }
+
   const publicId = req.nextUrl.searchParams.get("id")?.trim().toUpperCase();
 
   if (!publicId || !/^CV-\d{2}-[0-9A-HJKMNP-Z]{8}$/.test(publicId)) {

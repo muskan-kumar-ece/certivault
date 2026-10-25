@@ -1,9 +1,54 @@
 # Progress Log: CertiVault
 
-## Current: Work 5 — Organization, team, and settings (COMPLETED)
+## Current: Work 12 — Security hardening, testing, and load (COMPLETED)
 Status: done
-Branch: work-5/org-and-team
-Tag: work-5-done
+Branch: work-12/security-load-hardening
+Tag: work-12-done
+
+---
+
+### Done in Work 12
+- [x] Sliding-window token bucket rate limiting in `src/server/rate-limit.ts`:
+  - Microsecond in-memory bucket store with active garbage-collection sweeps.
+  - Public verification (`/c/[publicId]`): 60 req/min/IP
+  - PDF Download endpoint (`/api/download`): 60 req/min/IP with `Retry-After` and standard `X-RateLimit-*` headers
+  - Test certificate issuance (`sendTestCertificateAction`): 5 certs/day/org cap
+  - Auth rate limiting: 5 attempts/min/IP
+  - Batch upload rate limiting: 20 uploads/hour/org
+- [x] Next.js production Content-Security-Policy & Security Headers (`next.config.mjs`):
+  - CSP: `default-src 'self'`, `script-src 'self' 'unsafe-eval' 'unsafe-inline' https://checkout.razorpay.com`, `style-src 'self' 'unsafe-inline'`, `img-src 'self' data: blob: https://*.supabase.co`, `font-src 'self' data:`, `connect-src 'self' https://*.supabase.co https://api.razorpay.com https://lumberjack.razorpay.com`, `frame-src 'self' https://api.razorpay.com`.
+  - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
+  - `X-Frame-Options: DENY`
+  - `X-Content-Type-Options: nosniff`
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+- [x] Path Traversal and Injection Defenses:
+  - `sanitizeFilename` in `src/server/export.ts`: Strips directory traversal (`..`) patterns and replaces invalid characters.
+  - `sanitizeCsvValue`: Wraps fields with double-quotes and prepends single quote `'` to prevent DDE / spreadsheet formula execution (`=`, `+`, `-`, `@`, `\t`, `\r`).
+  - Server GST Calculation Authority: Pure server calculation based on `PRODUCTS` catalog, ignoring client pricing parameters.
+  - Razorpay Signature Forgery Defense: Timing-safe HMAC-SHA256 signature verification in `verifyPaymentSignature`.
+- [x] High-Throughput 1,000-Certificate Concurrency Stress Test (`scripts/benchmark-load.mjs`):
+  - Total certificates: 1,000 / 1,000 generated
+  - Failures: 0 (0.00% error rate)
+  - Wall clock duration: 17.15s (58.3 certs/sec throughput)
+  - Average latency: 67.06 ms
+  - p50 latency: 63.65 ms
+  - p95 latency: 83.22 ms (Well below <= 200 ms threshold)
+  - p99 latency: 130.15 ms
+  - Heap memory delta: +27.7 MB (clean garbage collection)
+- [x] Comprehensive Operational Runbook (`docs/runbook.md`):
+  - Stuck worker jobs recovery procedure with deterministic idempotent re-queuing.
+  - Razorpay webhook replay & automated/manual reconciliation procedures.
+  - Key rotation procedures for `WORKER_SECRET`, `RAZORPAY_KEY_SECRET`, and `SUPABASE_SERVICE_ROLE_KEY`.
+  - Accidental certificate revocation recovery via immutable `audit_logs`.
+  - DDoS / rate-limiting incident response and IP suppression.
+  - Postgres health, autovacuum, and PITR recovery in Mumbai (`ap-south-1`).
+- [x] Verification Suite Passing:
+  - `npm run guard`: 4/4 checks passed (secrets isolation, RLS, tokens only, allowlist)
+  - `npm run lint`: 0 errors
+  - `npm run typecheck`: 0 errors
+  - `npm test`: 81/81 tests passed across 11 test suites
+  - `npm run build`: Production build succeeded; all 32 routes compiled cleanly.
 
 ---
 

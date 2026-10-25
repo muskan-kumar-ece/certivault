@@ -7,6 +7,7 @@ import { applyCreditDelta } from "@/server/payments";
 import { enqueueJob } from "@/server/jobs";
 import { sendEmail } from "@/server/email";
 import { colors } from "@/lib/tokens";
+import { checkTestCertRateLimit } from "@/server/rate-limit";
 import {
   saveDraftBatchSchema,
   issueBatchSchema,
@@ -294,6 +295,14 @@ export async function sendTestCertificateAction(rawInput: SendTestCertificateInp
 
   if (org.suspended_at) {
     throw new Error("This organization is suspended. Sending test certificates is disabled.");
+  }
+
+  // TRD §14 Rate limit: 5 test certificates per day per org
+  const limitCheck = checkTestCertRateLimit(input.orgId);
+  if (!limitCheck.allowed) {
+    throw new Error(
+      "Daily test certificate limit reached (maximum 5 test certificates per day). Please issue a batch or try again tomorrow."
+    );
   }
 
   const testPublicId = newPublicId();

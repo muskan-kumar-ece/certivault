@@ -49,7 +49,7 @@ export function sanitizeCsvValue(val: string | null | undefined): string {
  * Sanitizes a filename for cross-platform filesystem safety.
  */
 export function sanitizeFilename(name: string): string {
-  return name.replace(/[/\\?%*:|"<>]/g, "_").trim().substring(0, 80);
+  return name.replace(/\.\.+/g, "_").replace(/[/\\?%*:|"<>]/g, "_").trim().substring(0, 80);
 }
 
 /**
