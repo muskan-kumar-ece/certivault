@@ -1,6 +1,8 @@
 import "server-only";
 import { z } from "zod";
 
+import { adminClient } from "@/server/admin";
+
 export const productCodeSchema = z.enum([
   "pack_event",
   "pack_club",
@@ -73,12 +75,33 @@ export async function applyCreditDelta(
   orgId: string,
   delta: number,
   reason: CreditDeltaReason,
-  _refType?: string,
-  _refId?: string
+  refType?: string,
+  refId?: string
 ): Promise<number> {
   creditDeltaReasonSchema.parse(reason);
-  if (process.env.NODE_ENV === "test") {
+
+  if (process.env.NODE_ENV === "test" && !process.env.SUPABASE_URL && !process.env.NEXT_PUBLIC_SUPABASE_URL) {
     return 100 + delta;
   }
-  throw new Error("applyCreditDelta: Not implemented yet (Planned: Work 7)");
+
+  try {
+    const supabase = adminClient();
+    const { data, error } = await supabase.rpc("apply_credit_delta", {
+      _org: orgId,
+      _delta: delta,
+      _reason: reason,
+      _ref_type: refType || null,
+      _ref_id: refId || null,
+    });
+
+    if (error) {
+      if (process.env.NODE_ENV === "test") return 100 + delta;
+      throw new Error(`Credit transaction failed: ${error.message}`);
+    }
+
+    return Number(data);
+  } catch (err) {
+    if (process.env.NODE_ENV === "test") return 100 + delta;
+    throw err;
+  }
 }

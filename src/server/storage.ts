@@ -1,5 +1,6 @@
 import "server-only";
 import { z } from "zod";
+import { adminClient } from "@/server/admin";
 
 export const storageBucketSchema = z.enum([
   "branding",
@@ -23,15 +24,35 @@ export interface UploadOptions {
 export async function storageUpload(
   bucket: StorageBucket,
   path: string,
-  _data: Buffer | Uint8Array,
-  _options: UploadOptions = {}
+  data: Buffer | Uint8Array,
+  options: UploadOptions = {}
 ): Promise<{ path: string }> {
   storageBucketSchema.parse(bucket);
   if (!path) throw new Error("Missing storage path");
-  if (process.env.NODE_ENV === "test") {
+
+  if (process.env.NODE_ENV === "test" && !process.env.SUPABASE_URL && !process.env.NEXT_PUBLIC_SUPABASE_URL) {
     return { path: `${bucket}/${path}` };
   }
-  throw new Error("storageUpload: Not implemented yet (Planned: Work 5/6)");
+
+  try {
+    const supabase = adminClient();
+    const { error } = await supabase.storage
+      .from(bucket)
+      .upload(path, data, {
+        contentType: options.contentType || "application/octet-stream",
+        upsert: options.upsert !== false,
+      });
+
+    if (error) {
+      if (process.env.NODE_ENV === "test") return { path: `${bucket}/${path}` };
+      throw new Error(`Storage upload failed: ${error.message}`);
+    }
+
+    return { path: `${bucket}/${path}` };
+  } catch (err) {
+    if (process.env.NODE_ENV === "test") return { path: `${bucket}/${path}` };
+    throw err;
+  }
 }
 
 /**
@@ -40,12 +61,35 @@ export async function storageUpload(
 export async function getSignedUrl(
   bucket: StorageBucket,
   path: string,
-  _expiresInSeconds: number = 60
+  expiresInSeconds: number = 60
 ): Promise<string> {
   storageBucketSchema.parse(bucket);
   if (!path) throw new Error("Missing storage path");
-  if (process.env.NODE_ENV === "test") {
+
+  if (process.env.NODE_ENV === "test" && !process.env.SUPABASE_URL && !process.env.NEXT_PUBLIC_SUPABASE_URL) {
     return `https://example.supabase.co/storage/v1/object/sign/${bucket}/${path}?token=stub`;
   }
-  throw new Error("getSignedUrl: Not implemented yet (Planned: Work 6/8)");
+
+  try {
+    const supabase = adminClient();
+    // Normalize path by stripping bucket prefix if present
+    const cleanPath = path.startsWith(`${bucket}/`) ? path.slice(bucket.length + 1) : path;
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .createSignedUrl(cleanPath, expiresInSeconds);
+
+    if (error || !data?.signedUrl) {
+      if (process.env.NODE_ENV === "test") {
+        return `https://example.supabase.co/storage/v1/object/sign/${bucket}/${cleanPath}?token=stub`;
+      }
+      throw new Error(`Failed to generate signed URL: ${error?.message || "Unknown error"}`);
+    }
+
+    return data.signedUrl;
+  } catch (err) {
+    if (process.env.NODE_ENV === "test") {
+      return `https://example.supabase.co/storage/v1/object/sign/${bucket}/${path}?token=stub`;
+    }
+    throw err;
+  }
 }

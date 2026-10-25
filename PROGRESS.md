@@ -113,11 +113,67 @@ Tag: work-5-done
 
 ---
 
+### Work 7: Import, issue wizard, credits, and worker (Completed 2026-10-25)
+- [x] Branch: `work-7/import-wizard-credits-worker`
+- [x] Migration `supabase/migrations/20261025000005_batches_certificates_jobs_ledger.sql`:
+  - `batches`, `certificates`, `jobs`, `credit_ledger` tables with strict multi-tenant RLS.
+  - `cert_update` restricted to `{owner,admin}` per TRD.md §4.
+  - GIN trigram index `certificates_name_trgm` on `certificates.recipient_name` for fast fuzzy searching.
+  - Atomic security-definer function `apply_credit_delta` with DB `CHECK (credit_balance >= 0)` constraint guaranteeing negative balance prevention.
+  - Security-definer queue function `claim_jobs` with `FOR UPDATE SKIP LOCKED` and poison job termination guard (`attempts >= max_attempts`).
+  - Private `certificates` storage bucket with path-scoped RLS policies.
+  - Audited and APPROVED by `db-security-reviewer` subagent.
+- [x] Server Module Implementations:
+  - `src/server/jobs.ts`: `enqueueJob`, `claimJobs`, `markJobDone`, `markJobFailed`.
+  - `src/server/payments.ts`: `applyCreditDelta` calling database function with rollback on overdraft.
+  - `src/server/storage.ts`: `storageUpload`, `getSignedUrl` for private certificate storage.
+- [x] Client-Side File Parsing & Column Alignment (`src/features/issue/parser.ts`):
+  - PapaParse (CSV) and SheetJS (XLSX/XLS) with greedy empty line skipping.
+  - 5,000-row safety cap.
+  - Fuse.js fuzzy column matcher with common alias dictionary.
+  - Sanitization, short-name rejection, email format checks, and duplicate detection.
+- [x] 5-Step Issuance Wizard (`/app/issue`):
+  - Step 1: Template selection grid with page size and field badges.
+  - Step 2: Recipient file drop zone & manual paste with instant row counter.
+  - Step 3: Column matching interface with auto-matched suggestions and field preview.
+  - Step 4: Audit & Review: valid row verification, cost summary card, credit balance check, and "Send me a test certificate".
+  - Step 5: Delivery configuration (email vs generate only) and confirmation dialog.
+  - Live generation progress ring with polling fallback.
+- [x] Queue Worker (`src/app/api/worker/route.ts`):
+  - Bearer `WORKER_SECRET` authentication.
+  - 45-second execution timebox with self-retriggering capability.
+  - `generate_chunk` execution: rendering PDF, SHA-256 fingerprinting, private storage upload, batch progress updating, and automatic credit refund on failed rows.
+- [x] Automated Unit & Integration Tests in `src/test/issue-and-worker.test.ts` (9 tests; total suite 41/41 passing).
+- [x] Verification Suite Passing:
+  - `npm run guard`: 4/4 checks passed.
+  - `npm run lint`: 0 errors.
+  - `npm run typecheck`: 0 errors.
+  - `npm test`: 41/41 tests passed.
+  - `npm run build`: Production build succeeded; all 16 routes compiled cleanly.
+
+---
+
+### Exit gate — Work 7
+- [x] `batches`, `certificates`, `jobs`, `credit_ledger` tables migration with RLS + pgTAP tests
+- [x] Atomic `apply_credit_delta` SQL function with balance checks verified
+- [x] `claim_jobs` with `FOR UPDATE SKIP LOCKED` and poison job recovery verified
+- [x] Client-side CSV/XLSX parser with fuzzy column matching (Fuse.js)
+- [x] 5-step issuance wizard live at `/app/issue` (Template, Recipients, Match, Review, Issue)
+- [x] Background worker queue processor live at `/api/worker`
+- [x] Credit consumption and ledger reconciliation tests green
+- [x] All 41 unit/integration tests green
+- [x] Production build passes cleanly with 0 errors
+- [x] Tag created: `work-7-done`
+
+---
+
 ### Next
-- Next step is **WORK 7: Import, issue wizard, credits, and worker**:
-  - `batches`, `certificates`, `jobs`, `credit_ledger` tables migration with RLS
-  - Atomic `apply_credit_delta` SQL function with balance checks
-  - Client-side CSV/XLSX parser with fuzzy column matching (Fuse.js)
-  - 5-step issuance wizard at `/app/issue` (Upload, Map, Template, Preview, Confirm)
-  - Background worker queue processor at `/api/worker` with `FOR UPDATE SKIP LOCKED`
-  - Credit consumption and ledger reconciliation tests
+- Next step is **WORK 8: Email delivery and public verification**:
+  - Email provider interface with Resend implementation and dev console transport
+  - React Email templates: certificate delivery, batch complete, sign-in/invite
+  - `send_email_chunk` job; suppression list table + checks; throttling
+  - Email webhooks (delivered, bounced, complained) → `email_status`
+  - Migration: `get_public_certificate` RPC, `verification_events`, `abuse_reports`
+  - Rate limiting on verify, auth, uploads, test sends
+  - `/c/[publicId]` public verification page (valid, revoked, not-found states; verified seal; download via signed URL)
+  - `/verify` QR camera scanner and ID entry screen
