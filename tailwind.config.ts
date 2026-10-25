@@ -19,6 +19,13 @@ const config: Config = {
           secondary: "var(--ink-secondary)",
         },
         hairline: "var(--hairline)",
+        brand: {
+          primary: "var(--brand-primary)",
+          navy: "var(--brand-navy)",
+          violet: "var(--brand-violet)",
+          cyan: "var(--brand-cyan)",
+          soft: "var(--brand-soft)",
+        },
         accent: {
           DEFAULT: "var(--accent)",
           hover: "var(--accent-hover)",
@@ -34,11 +41,11 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
+          "Inter",
           "-apple-system",
           "BlinkMacSystemFont",
-          '"SF Pro Text"',
-          '"SF Pro Display"',
-          "Inter",
+          '"Segoe UI"',
+          "Roboto",
           "sans-serif",
         ],
       },

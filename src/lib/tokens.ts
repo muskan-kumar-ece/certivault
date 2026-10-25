@@ -5,30 +5,30 @@
 
 export const colors = {
   canvas: {
-    light: "#F5F5F7",
-    dark: "#000000",
+    light: "#F7F8FC",
+    dark: "#0B0F19",
   },
   surface: {
     light: "#FFFFFF",
-    dark: "#1C1C1E",
+    dark: "#10152E",
   },
   surfaceRaised: {
     light: "#FFFFFF",
-    dark: "#2C2C2E",
+    dark: "#1A2035",
   },
   ink: {
     primary: {
-      light: "#1D1D1F",
-      dark: "#F5F5F7",
+      light: "#111827",
+      dark: "#F9FAFB",
     },
     secondary: {
-      light: "#6E6E73",
-      dark: "#98989D",
+      light: "#64748B",
+      dark: "#94A3B8",
     },
   },
   hairline: {
-    light: "rgba(60,60,67,0.12)",
-    dark: "rgba(84,84,88,0.45)",
+    light: "rgba(226, 232, 240, 0.8)",
+    dark: "rgba(51, 65, 85, 0.5)",
   },
   accent: {
     ultramarine: {
@@ -40,6 +40,13 @@ export const colors = {
       dark: "#849BFF",
     },
   },
+  brand: {
+    primary: "#365CFF",
+    navy: "#10152E",
+    violet: "#8B5CF6",
+    cyan: "#67E8F9",
+    soft: "#F7F8FC",
+  },
   seal: {
     verified: {
       light: "#1FA971",
@@ -47,12 +54,12 @@ export const colors = {
     },
   },
   warning: {
-    light: "#E08A00",
-    dark: "#FF9F0A",
+    light: "#F59E0B",
+    dark: "#FBBF24",
   },
   danger: {
-    light: "#D92D20",
-    dark: "#FF453A",
+    light: "#EF4444",
+    dark: "#F87171",
   },
 } as const;
 
