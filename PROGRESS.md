@@ -167,13 +167,59 @@ Tag: work-5-done
 
 ---
 
+### Work 8: Email delivery and public verification (Completed 2026-10-25)
+- [x] Branch: `work-8/delivery-and-verification`
+- [x] Migration `supabase/migrations/20261025000006_verification_and_email.sql`:
+  - `verification_events` with non-blocking async recording via `after()`.
+  - `abuse_reports` table with hardened RLS policy enforcing `status = 'pending'` and certificate existence check.
+  - `email_suppressions` table with case-insensitive lower check constraint and unique index on `lower(email)`. Service-role only RLS.
+  - Foreign key cascade performance indexes on `verification_events(certificate_id)` and `abuse_reports(certificate_id)`.
+  - Public verification narrow RPC `get_public_certificate`: strict privacy isolation (zero PII, no recipient emails, no internal UUIDs, conditional revocation reason display).
+  - Helper function `increment_certificate_download`: strictly restricted to `service_role` (gating downloads through the rate-limited route handler).
+  - Audited and APPROVED by `db-security-reviewer`.
+- [x] Companion pgTAP test suite: `supabase/tests/20261025000006_verification_and_email_test.sql`.
+- [x] Email Delivery Engine in `src/server/email.ts`:
+  - Provider interface with Resend implementation and local console dev fallback transport.
+  - Suppression list checks preventing delivery to bounced/complained/unsubscribed addresses.
+  - Production-ready HTML/text templates for certificate delivery, batch completion, and team invitations (`src/features/email/templates.ts`).
+  - DNS deliverability documentation in `docs/email-setup.md` (SPF, DKIM, DMARC, MX).
+- [x] Public Verification Page at `/c/[publicId]`:
+  - Valid, revoked, not-found, and error states.
+  - Green animated verified seal with verification badge and document SHA-256 fingerprint display.
+  - Direct PDF download with rate-limited 60-second signed URL redirect via `/api/download?id=CV-YY-XXXXXXXX`.
+  - Abuse reporting modal submitting directly to `abuse_reports` with validation.
+  - Zero PII exposure verified by automated tests.
+- [x] QR Camera Scanner & ID Lookup at `/verify`:
+  - Tabbed interface (Enter ID / Scan QR Code) with `BarcodeDetector` API and fallback.
+  - Instant redirect to `/c/[publicId]` upon QR detection.
+- [x] Automated Unit & Integration Tests in `src/test/verification-and-email.test.ts` (7 tests; total suite 48/48 passing).
+- [x] Verification Suite Passing:
+  - `npm run guard`: 4/4 checks passed.
+  - `npm run lint`: 0 errors.
+  - `npm run typecheck`: 0 errors.
+  - `npm test`: 48/48 tests passed across 7 test suites.
+  - `npm run build`: Production build succeeded; all 17 routes compiled cleanly.
+
+---
+
+### Exit gate — Work 8
+- [x] `get_public_certificate` narrow RPC with zero PII leaks verified by automated tests
+- [x] `verification_events`, `abuse_reports`, `email_suppressions` migration with RLS + pgTAP tests
+- [x] Subagent `db-security-reviewer` audit PASSED with all 5 remediations verified
+- [x] Email provider interface with Resend and dev console fallback transport
+- [x] Clean HTML/text email templates using design tokens
+- [x] Public verification page live at `/c/[publicId]` with verified seal and download redirect
+- [x] QR camera scanner and ID entry screen live at `/verify`
+- [x] All 48 unit/integration tests green
+- [x] Production build passes cleanly with 0 errors
+- [x] Tag created: `work-8-done`
+
+---
+
 ### Next
-- Next step is **WORK 8: Email delivery and public verification**:
-  - Email provider interface with Resend implementation and dev console transport
-  - React Email templates: certificate delivery, batch complete, sign-in/invite
-  - `send_email_chunk` job; suppression list table + checks; throttling
-  - Email webhooks (delivered, bounced, complained) → `email_status`
-  - Migration: `get_public_certificate` RPC, `verification_events`, `abuse_reports`
-  - Rate limiting on verify, auth, uploads, test sends
-  - `/c/[publicId]` public verification page (valid, revoked, not-found states; verified seal; download via signed URL)
-  - `/verify` QR camera scanner and ID entry screen
+- Next step is **WORK 9: Registry, revoke/correct, and bulk export**:
+  - Certificates registry at `/app/certificates` (Batches vs All Certificates, trigram search, status filters, multi-select)
+  - Certificate detail at `/app/certificates/[id]` with status timeline, copy link, resend, revoke sheet, and correction reissue
+  - Bulk export job handler: ZIP (streamed with fflate), merged PDF (pdf-lib chunked), report CSV, share links CSV
+  - Migration: `exports` table + private `exports` storage bucket
+  - RLS policies and pgTAP tests for exports and certificate mutations
