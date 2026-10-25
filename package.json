@@ -1,6 +1,6 @@
 {
   "name": "certivault",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:db": "echo 'Run supabase db test via Supabase CLI or pgTAP suite'",
+    "verify:prod": "node scripts/verify-production-readiness.mjs",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\""
   },
   "dependencies": {

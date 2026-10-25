@@ -1,13 +1,52 @@
 # Progress Log: CertiVault
 
-## Current: Work 12 — Security hardening, testing, and load (COMPLETED)
+## Current: Work 13 — Production deployment and launch (COMPLETED)
 Status: done
-Branch: work-12/security-load-hardening
-Tag: work-12-done
+Branch: work-13/production-launch
+Tag: v1.0.0
 
 ---
 
+### Done in Work 13
+- [x] Production Deployment & Operations Guide (`docs/DEPLOYMENT.md`):
+  - Infrastructure topology: Vercel Mumbai (`bom1`) paired with Supabase Mumbai (`ap-south-1`, live project ref: `hydvivhoetmxtvvqxkuc`).
+  - Production environment variable manifest strictly aligned with `TRD.md` §17.
+  - Complete 9-migration inventory verification and zero-downtime execution procedures.
+  - Storage bucket setup & tenant RLS confirmation (`branding`, `certificates`, `exports`).
+  - Background worker scheduling via `pg_cron` / `pg_net` heartbeat to `/api/worker`.
+  - DNS records documentation (Root A/CNAME, SPF, DKIM, DMARC for `mail.certivault.in`).
+  - Razorpay Live Mode transition protocol, live webhook subscription, and ₹1-class reconciliation drill.
+  - Instant Vercel rollback protocol (<3s edge reroute) and database additive schema migration notes.
+- [x] Post-Launch Backlog & Roadmap (`docs/v1.1-backlog.md`):
+  - Derived from `PRD.md` §5: Multi-stage approval workflow, WhatsApp delivery via Gupshup/Twilio, 1-click "Add to LinkedIn" credential button, custom subdomain verification with SSL (`verify.college.ac.in`), PDF SHA-256 fingerprint verifier, scheduled issuance, and optional AI smart column mapper.
+  - Long-term v2.0 roadmap: Public REST API with scoped API keys, student mobile credential wallet, SAML/OIDC enterprise SSO, and Open Badges 3.0 / W3C verifiable credentials.
+- [x] Production Readiness Verification Automation (`scripts/verify-production-readiness.mjs`):
+  - Automated check for all 9 sequential database migrations.
+  - All 4 architecture guard rules verified.
+  - Strict TypeScript compilation (0 errors).
+  - ESLint static analysis (0 errors).
+  - All 11 Vitest test suites (81/81 tests passing).
+  - Production runbook & deployment documentation presence.
+- [x] Package version updated to `1.0.0` with `"verify:prod"` script.
+- [x] Full Verification Suite Passing:
+  - `npm run guard`: 4/4 checks passed (secrets isolation, RLS, tokens only, allowlist)
+  - `npm run lint`: 0 errors
+  - `npm run typecheck`: 0 errors
+  - `npm test`: 81/81 tests passed across 11 test suites
+  - `npm run build`: Production build succeeded; all 32 routes compiled cleanly
+  - `npm run verify:prod`: ALL PRODUCTION READINESS CHECKS PASSED.
+
+---
+
+## Past Works Completed (Work 0 to Work 12)
+
 ### Done in Work 12
+- [x] Sliding-window token bucket rate limiting in `src/server/rate-limit.ts`
+- [x] Next.js production Content-Security-Policy & Security Headers (`next.config.mjs`)
+- [x] Path Traversal and Injection Defenses (`sanitizeFilename`, `sanitizeCsvValue`, server GST authority, timing-safe HMAC)
+- [x] High-Throughput 1,000-Certificate Concurrency Stress Test: 1,000/1,000 generated (0% errors, 58.3 certs/sec, p95: 83.22 ms)
+- [x] Comprehensive Operational Runbook (`docs/runbook.md`)
+- [x] Tag: `work-12-done`
 - [x] Sliding-window token bucket rate limiting in `src/server/rate-limit.ts`:
   - Microsecond in-memory bucket store with active garbage-collection sweeps.
   - Public verification (`/c/[publicId]`): 60 req/min/IP
