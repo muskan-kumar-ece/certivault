@@ -1,6 +1,11 @@
 import "server-only";
 import { randomBytes } from "crypto";
 import { z } from "zod";
+import fs from "fs";
+import path from "path";
+import { generate } from "@pdfme/generator";
+import { text, image, barcodes } from "@pdfme/schemas";
+import type { Template, Font } from "@pdfme/common";
 
 const CROCKFORD_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 
@@ -29,19 +34,78 @@ export const renderCertificateSchema = z.object({
 
 export type RenderCertificateInput = z.infer<typeof renderCertificateSchema>;
 
+// Cached in-memory font buffers
+let cachedFonts: Font | null = null;
+
+export function getCertificateFonts(): Font {
+  if (cachedFonts) return cachedFonts;
+
+  const fontsDir = path.join(process.cwd(), "public", "fonts");
+  const interPath = path.join(fontsDir, "Inter.ttf");
+  const playfairPath = path.join(fontsDir, "PlayfairDisplay.ttf");
+  const devanagariPath = path.join(fontsDir, "NotoSansDevanagari.ttf");
+  const teluguPath = path.join(fontsDir, "NotoSansTelugu.ttf");
+
+  const fontConfig: Font = {};
+
+  if (fs.existsSync(interPath)) {
+    fontConfig.Inter = {
+      data: fs.readFileSync(interPath),
+      fallback: true,
+    };
+  }
+  if (fs.existsSync(playfairPath)) {
+    fontConfig.PlayfairDisplay = {
+      data: fs.readFileSync(playfairPath),
+    };
+  }
+  if (fs.existsSync(devanagariPath)) {
+    fontConfig.NotoSansDevanagari = {
+      data: fs.readFileSync(devanagariPath),
+    };
+  }
+  if (fs.existsSync(teluguPath)) {
+    fontConfig.NotoSansTelugu = {
+      data: fs.readFileSync(teluguPath),
+    };
+  }
+
+  cachedFonts = fontConfig;
+  return cachedFonts;
+}
+
 /**
- * Locked module interface for certificate PDF generation (pdfme / pdf-lib).
- * Full implementation will arrive in Work 6.
+ * Renders a certificate to PDF bytes using pdfme generator.
+ * Supports vector QR code, Inter, Playfair Display, Noto Sans Devanagari (Hindi), and Noto Sans Telugu.
  */
 export async function renderCertificate(
   template: Record<string, unknown>,
   input: Record<string, string>,
-  fonts?: Record<string, unknown>
+  customFonts?: Record<string, unknown>
 ): Promise<Buffer> {
-  renderCertificateSchema.parse({ template, input, fonts });
-  // Stub body for Architecture Lock (Work 3)
-  if (process.env.NODE_ENV === "test") {
-    return Buffer.from("%PDF-1.4 stub");
-  }
-  throw new Error("renderCertificate: Not implemented yet (Planned: Work 6)");
+  renderCertificateSchema.parse({ template, input, fonts: customFonts });
+
+  // Default basePdf and schemas if missing to support minimal template calls
+  const fullTemplate = {
+    ...template,
+    basePdf: template.basePdf || { width: 297, height: 210, padding: [10, 10, 10, 10] },
+    schemas: Array.isArray(template.schemas) && template.schemas.length > 0 ? template.schemas : [[]],
+  };
+
+  const fontOptions = (customFonts as Font) || getCertificateFonts();
+
+  const pdfBytes = await generate({
+    template: fullTemplate as unknown as Template,
+    inputs: [input],
+    plugins: {
+      text,
+      image,
+      qrcode: barcodes.qrcode,
+    },
+    options: {
+      font: fontOptions,
+    },
+  });
+
+  return Buffer.from(pdfBytes);
 }
