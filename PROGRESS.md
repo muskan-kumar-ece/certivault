@@ -56,10 +56,8 @@ Tag: work-1-done
 
 ### Conflicts / Blockers
 1. **Live Supabase Credentials**:
-   - Ready for user to fill in `.env.local`:
-     - `NEXT_PUBLIC_SUPABASE_URL`
-     - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-     - `SUPABASE_SERVICE_ROLE_KEY`
+   - [x] Configured and verified with live project `hydvivhoetmxtvvqxkuc`.
+   - [x] Auth and Admin service-role endpoints confirmed responsive.
 
 ---
 
