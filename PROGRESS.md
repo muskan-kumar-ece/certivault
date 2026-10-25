@@ -272,12 +272,75 @@ Tag: work-5-done
 
 ---
 
+### Work 10: Payments, plans, credits, and invoices (Completed 2026-10-25)
+- [x] Branch: `work-10/payments-credits-invoices`
+- [x] Migration `supabase/migrations/20261025000008_payments_and_invoices.sql`:
+  - `payments` table with `status in ('created', 'paid', 'failed', 'refunded')`, amounts in paise, GST breakdown (`cgst`, `sgst`, `igst`), and partial unique index on non-null `payment_id`.
+  - Zero client update policy on `payments` (status transitions strictly performed via service role).
+  - Multi-tenant RLS on `payments` and `invoices` restricted to `{owner,admin}`.
+  - `invoices` table with sequential numbering per financial year (`CV/2026-27/000001`).
+  - `invoice_counters` table with RLS enabled and atomic increment function `generate_invoice_number(_fy)` restricted to `service_role`.
+  - `webhook_events` table for idempotent Razorpay event processing.
+  - Private `invoices` storage bucket with storage RLS restricted to `{owner,admin}`.
+  - Audited and APPROVED by `db-security-reviewer`.
+- [x] Companion pgTAP test suite: `supabase/tests/20261025000008_payments_and_invoices_test.sql`.
+- [x] Pricing Configuration in `src/lib/pricing.ts`:
+  - Self-serve packs: `pack_event` (500 certs @ ₹999), `pack_club` (2,000 certs @ ₹2,999), `pack_bulk` (10,000 certs @ ₹5,999).
+  - Annual subscription: `plan_campus` (₹24,999/yr).
+- [x] Payment Engine in `src/server/payments.ts`:
+  - Server authority on prices (no client-provided amounts).
+  - GST computation engine: 18% intra-state split into equal CGST (9%) and SGST (9%), and 100% IGST (18%) for inter-state.
+  - Razorpay order creation via official REST API.
+  - Idempotent payment fulfillment granting credits via `apply_credit_delta`.
+  - Timing-safe HMAC-SHA256 signature verification.
+- [x] Webhook Route `src/app/api/webhooks/razorpay/route.ts`:
+  - Raw body verification against `RAZORPAY_WEBHOOK_SECRET`.
+  - Idempotent deduplication via `webhook_events`.
+  - Handles `order.paid` and `payment.captured` with invoice generation trigger.
+- [x] Client Checkout Route `src/app/api/billing/confirm/route.ts`:
+  - Immediate fulfillment on client checkout completion with verification fallback.
+- [x] PDF Invoice Generator in `src/server/invoices.ts`:
+  - Generates compliant GST Tax Invoices using `pdf-lib` vector engine.
+  - Sequential invoice number, HSN/SAC code 998313, GST breakdown, customer GSTIN/state, and reverse charge declaration.
+  - Uploads to private `invoices` bucket with signed URL generation.
+  - Integrated into background worker (`invoice` job).
+- [x] Billing Dashboard UI at `/app/account/billing`:
+  - Current plan status, active credits balance, and auto-refill configuration.
+  - Self-serve credit pack purchase cards with modal Razorpay checkout.
+  - GST invoicing details form (legal name, GSTIN, billing address, state).
+  - Invoices history table with download action via signed URLs.
+- [x] Public Pricing Page at `/pricing`:
+  - Comparison table for Event, Club, Enterprise, and Campus plans.
+  - Transparent pricing, FAQ section, and direct CTA to signup/billing.
+- [x] Automated Unit & Integration Tests in `src/test/payments-and-billing.test.ts` (8 tests; total suite 66/66 passing).
+- [x] Verification Suite Passing:
+  - `npm run guard`: 4/4 checks passed.
+  - `npm run lint`: 0 errors.
+  - `npm run typecheck`: 0 errors.
+  - `npm test`: 66/66 tests passed across 9 test suites.
+  - `npm run build`: Production build succeeded; all 22 routes compiled cleanly.
+
+---
+
+### Exit gate — Work 10
+- [x] `payments`, `invoices`, `invoice_counters`, `webhook_events` migration with RLS + pgTAP tests
+- [x] Subagent `db-security-reviewer` audit PASSED with zero client UPDATE policy on payments
+- [x] Credit pack order creation with server authority on prices
+- [x] GST calculation (18% intra/inter-state, paise rounding, SAC 998313)
+- [x] Razorpay webhook endpoint with raw body HMAC verification and deduplication
+- [x] Sequential invoice numbering per Indian FY with zero gaps
+- [x] PDF invoice generation and upload to private `invoices` bucket
+- [x] Billing UI at `/app/account/billing` and public pricing page at `/pricing`
+- [x] All 66 unit/integration tests green
+- [x] Production build passes cleanly with 0 errors
+- [x] Tag created: `work-10-done`
+
+---
+
 ### Next
-- Next step is **WORK 10: Payments, plans, credits, and invoices**:
-  - Pricing config (pack_event: 500 certs @ ₹1,499; pack_club: 2,000 certs @ ₹4,499; pack_bulk: 10,000 certs @ ₹14,999; plan_campus: ₹49,999/year)
-  - Razorpay order creation server action with GST computation (18% intra/inter-state)
-  - Razorpay checkout integration with UPI priority on mobile
-  - Webhook `/api/webhooks/razorpay` with raw body HMAC-SHA256 signature verification and idempotent fulfillment
-  - Migration: `payments` table, `invoices` table, sequential invoice numbering (`CV/2026-27/000001`), private `invoices` bucket
-  - PDF invoice generator using the same PDF engine
-  - Billing UI at `/app/account/billing`
+- Next step is **WORK 11: Admin console, polish, and mobile PWA**:
+  - Platform admin console at `/admin` (super-admin access check, org list, credit adjustments, review queue for verified issuers and abuse reports)
+  - PWA manifest (`manifest.json`), icons, Apple touch icons, theme colors
+  - Mobile UX polish (bottom sheets, touch feedback, swipe gestures, haptic triggers)
+  - View Transitions API integration
+  - Performance and Lighthouse audits (PWA, a11y >= 95)

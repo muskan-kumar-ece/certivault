@@ -6,6 +6,7 @@ import { renderCertificate } from "@/server/pdf";
 import { storageUpload } from "@/server/storage";
 import { applyCreditDelta } from "@/server/payments";
 import { buildExport } from "@/server/export";
+import { generateInvoicePdf } from "@/server/invoices";
 
 export const maxDuration = 60; // 60s execution limit
 
@@ -50,8 +51,16 @@ export async function POST(req: NextRequest) {
             await handleCleanup(supabase);
             await markJobDone(job.id);
             processedCount++;
+          } else if (job.type === "invoice") {
+            const paymentId = job.payload.payment_id as string;
+            const orgId = job.payload.org_id as string;
+            if (paymentId && orgId) {
+              await generateInvoicePdf({ paymentId, orgId });
+            }
+            await markJobDone(job.id);
+            processedCount++;
           } else {
-            // Placeholder for future job types (send_email_chunk, invoice)
+            // Placeholder for future job types (send_email_chunk)
             await markJobDone(job.id);
             processedCount++;
           }
