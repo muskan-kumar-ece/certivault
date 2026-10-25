@@ -21,21 +21,10 @@ const eslintConfig = [
         },
       ],
       "@typescript-eslint/no-explicit-any": "warn",
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            {
-              group: ["@/server/*"],
-              message:
-                "src/server is server-only. Do not import directly into client or UI components.",
-            },
-          ],
-        },
-      ],
     },
   },
   {
+    // Client UI components must be completely decoupled
     files: ["src/components/ui/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [
@@ -53,6 +42,7 @@ const eslintConfig = [
     },
   },
   {
+    // Utilities and schemas cannot import domain features or server logic
     files: ["src/lib/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [
@@ -63,6 +53,24 @@ const eslintConfig = [
               group: ["@/features/*", "@/server/*", "@/app/*"],
               message:
                 "src/lib utilities cannot import from features, server, or app.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // Disallow server-only imports in client feature components
+    files: ["src/features/**/components/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/server/*"],
+              message:
+                "src/server is server-only. Do not import directly into client components.",
             },
           ],
         },
