@@ -1,8 +1,9 @@
 # Progress Log: CertiVault
 
-## Current: Work 0 — Orient and prepare
-Status: in progress
-Branch: main
+## Current: Work 1 — Repository, folder structure, and rules (COMPLETED)
+Status: done
+Branch: work-1/repo-skeleton
+Tag: work-1-done
 
 ---
 
@@ -20,61 +21,58 @@ Branch: main
 
 ---
 
-### Plan (Current Task)
-- [x] Read all specification documents (`PRD.md`, `TRD.md`, `architecture.md`, `implementation.md`, `AGENT_PLAN.md`, `AGENT_PROMPT.md`)
-- [x] Save standing prompt and rules into repo-root `AGENTS.md` and `CLAUDE.md`
-- [x] Register and configure the 6 required subagents (`spec-navigator`, `db-security-reviewer`, `ui-reviewer`, `test-writer`, `pipeline-verifier`, `docs-keeper`)
-- [x] Create `PROGRESS.md` with product understanding summary and exit gate tracking
-- [ ] Confirm environment requirements and open questions with human
-
----
-
-### Done
-- [x] Full docs review completed — verified 6 spec files in `docs/`
-- [x] Repository rules established in `AGENTS.md` and `CLAUDE.md`
-- [x] Subagents defined in memory and saved to `.claude/agents/*.md`
-- [x] Work 0 environment verification executed:
-  - Node.js: `v22.15.0` (OK)
-  - npm: `10.9.2` (OK)
-  - Git: `2.52.0.windows.1` (OK)
+### Done in Work 1
+- [x] Initialized Git repository on branch `work-1/repo-skeleton`.
+- [x] Installed allowlist dependencies matching `AGENT_PLAN.md` §5 (Next.js 15, React 19, Supabase SSR & JS, Tailwind CSS, Radix UI, Zod, Vitest).
+- [x] Created strict folder layout per `architecture.md` §6 with boundary `README.md` files:
+  - `src/app/` (`(marketing)`, `(auth)`, `(app)/app`, `c/[publicId]`, `verify`, `api`)
+  - `src/components/ui/` (primitives; no imports from features/server)
+  - `src/features/` (`templates`, `issue`, `certificates`, `billing`, `team`, `org`)
+  - `src/server/` (`pdf`, `jobs`, `email`, `payments`, `export`, `auth`, `admin`)
+  - `src/lib/` (`supabase`, `schemas`, `tokens`, `utils`)
+  - `supabase/` (`migrations`, `tests`, `seed.sql`)
+  - `scripts/` & `public/fonts/`
+- [x] Enforced ESLint boundary restrictions (`no-restricted-imports` blocking UI/lib from accessing features/server).
+- [x] Verified intentional bad import failure (deliberate UI → server import failed build with exit code 1, then removed).
+- [x] Created `.env.example` with full TRD §17 spec and `.env.local` template for live Supabase credentials (gitignored).
+- [x] Implemented Supabase client factories:
+  - `src/lib/supabase/browser.ts` (browser client, public anon key)
+  - `src/lib/supabase/server.ts` (cookie-based SSR client)
+  - `src/server/admin.ts` (restricted service-role client with `import 'server-only'`)
+- [x] Verified clean builds across all standing commands:
+  - `npm run typecheck`: PASS (0 errors)
+  - `npm test`: PASS (1 file, 3 tests)
+  - `npm run lint`: PASS (0 errors, 0 warnings)
+  - `npm run build`: PASS (all 8 routes compiled statically / dynamically; shared JS 103 kB)
+- [x] Created commit `977a810` and git tag `work-1-done`.
 
 ---
 
 ### Decisions
-- 2026-10-25: Adopted strict precedence order: `ARCHITECTURE_LOCK.md` > `TRD.md` > `PRD.md` > `architecture.md` > `implementation.md`.
-- 2026-10-25: Subagents configured with explicit separation of concerns; review subagents are strictly read-only on product code.
+- 2026-10-25: Adopted strict Feature-Driven Modular Monolith per `architecture.md` ADR 1 and Work 1 specifications.
+- 2026-10-25: Enforced `server-only` import barriers preventing accidental client bundle leaks of the service-role key.
 
 ---
 
-### Conflicts / Blockers (PRD §15 & Environment Open Questions)
-1. **BLOCKER: Docker & Supabase CLI Environment**:
-   - `docker` is currently not detected in the Windows PATH.
-   - Local Supabase (`npx supabase start`, pgTAP testing) requires Docker Desktop running.
-   - *Question for human:* Is Docker Desktop installed or should we prepare cloud Supabase staging/dev project for migration testing if Docker is unavailable locally?
-2. **Open Product Questions (from PRD §15)**:
-   - Final product name and domain confirmation (confirm if working name "CertiVault" / `certivault.in` remains).
-   - Email delivery default: Confirm link-only delivery vs attaching PDFs directly in v1.0 (recommended: link-only as specified in TRD §9 / ADR 7).
-   - Free tier credits: 50 credits (default in PRD/TRD) vs 100 credits.
-3. **Accounts Provisioning**:
-   - Supabase project in Mumbai (`ap-south-1`)
-   - Vercel project in Mumbai (`bom1`)
-   - Resend API key & sending domain
-   - Razorpay test mode credentials (`RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`)
-   - Sentry DSN
+### Conflicts / Blockers
+1. **Live Supabase Credentials**:
+   - Ready for user to fill in `.env.local`:
+     - `NEXT_PUBLIC_SUPABASE_URL`
+     - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+     - `SUPABASE_SERVICE_ROLE_KEY`
 
 ---
 
-### Exit gate — Work 0
-- [x] `PROGRESS.md` exists with 10-line summary
-- [x] Specification documents read completely
-- [x] Repo-root `AGENTS.md` created
-- [ ] Open questions answered or acknowledged by human
-- [ ] Tool confirmation finalized (Docker / Supabase CLI)
-- [ ] Account confirmation received
-- [ ] Ready to start Work 1
+### Exit gate — Work 1
+- [x] `npm run lint && npm run typecheck && npm test && npm run build` — all pass cleanly
+- [x] Deliberate bad import (ui → server) fails lint (verified and reverted)
+- [x] Tag created: `work-1-done`
 
 ---
 
 ### Next
-- Receive human confirmation on open questions and Docker setup.
-- Begin **Work 1: Repository, folder structure, and rules** (create Next.js skeleton, setup ESLint boundary rules, CI workflows, and test harnesses).
+- Next step is **Work 2: Foundation (database, auth, organizations, app shell)**:
+  - Add initial Supabase migrations for `orgs`, `org_members`, `invitations`, `signatories`, `platform_admins`, `audit_logs`.
+  - Implement RLS helper functions (`is_member`, `has_role`) and policies.
+  - Setup authentication flows (Email OTP + Google).
+  - Build basic `(app)` shell and org onboarding.
