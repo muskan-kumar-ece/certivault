@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createOrganizationAction } from "@/features/org/actions";
 import { OrgKind } from "@/lib/schemas/org";
+import { colors } from "@/lib/tokens";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -11,7 +12,7 @@ export default function OnboardingPage() {
   const [name, setName] = useState("");
   const [kind, setKind] = useState<OrgKind>("club");
   const [city, setCity] = useState("");
-  const [brandColor, setBrandColor] = useState("#3355FF");
+  const [brandColor, setBrandColor] = useState<string>(colors.accent.ultramarine.light);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

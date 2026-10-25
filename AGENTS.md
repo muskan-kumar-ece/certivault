@@ -78,3 +78,15 @@ Halt immediately and ask the human when:
 - An action is destructive or irreversible.
 - A test fix would weaken a security rule or test assertion.
 - Three attempts at a fix have failed.
+
+---
+
+## 5. LOCKED CONTRACTS (From Work 3 Onward)
+
+`ARCHITECTURE_LOCK.md` is now frozen.
+- **Do not change anything listed in ARCHITECTURE_LOCK.md without an approved Change Request (CR).**
+- If a task requires altering table columns, module signatures, route paths, dependency allowlist, or ADR decisions:
+  1. STOP and create a draft CR in `docs/change-requests/`.
+  2. Await human approval recorded in `PROGRESS.md`.
+  3. Only modify locked files after approval.
+

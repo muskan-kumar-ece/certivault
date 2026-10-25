@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
+    "guard": "node scripts/guard-rules.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:db": "echo 'Run supabase db test via Supabase CLI or pgTAP suite'",

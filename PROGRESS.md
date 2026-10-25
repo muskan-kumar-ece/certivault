@@ -1,9 +1,9 @@
 # Progress Log: CertiVault
 
-## Current: Work 1 — Repository, folder structure, and rules (COMPLETED)
+## Current: Work 2 — Foundation (database, auth, organizations, app shell) (COMPLETED)
 Status: done
-Branch: work-1/repo-skeleton
-Tag: work-1-done
+Branch: work-2/foundation
+Tag: work-2-done
 
 ---
 
@@ -21,56 +21,57 @@ Tag: work-1-done
 
 ---
 
-### Done in Work 1
-- [x] Initialized Git repository on branch `work-1/repo-skeleton`.
-- [x] Installed allowlist dependencies matching `AGENT_PLAN.md` §5 (Next.js 15, React 19, Supabase SSR & JS, Tailwind CSS, Radix UI, Zod, Vitest).
-- [x] Created strict folder layout per `architecture.md` §6 with boundary `README.md` files:
-  - `src/app/` (`(marketing)`, `(auth)`, `(app)/app`, `c/[publicId]`, `verify`, `api`)
-  - `src/components/ui/` (primitives; no imports from features/server)
-  - `src/features/` (`templates`, `issue`, `certificates`, `billing`, `team`, `org`)
-  - `src/server/` (`pdf`, `jobs`, `email`, `payments`, `export`, `auth`, `admin`)
-  - `src/lib/` (`supabase`, `schemas`, `tokens`, `utils`)
-  - `supabase/` (`migrations`, `tests`, `seed.sql`)
-  - `scripts/` & `public/fonts/`
-- [x] Enforced ESLint boundary restrictions (`no-restricted-imports` blocking UI/lib from accessing features/server).
-- [x] Verified intentional bad import failure (deliberate UI → server import failed build with exit code 1, then removed).
-- [x] Created `.env.example` with full TRD §17 spec and `.env.local` template for live Supabase credentials (gitignored).
-- [x] Implemented Supabase client factories:
-  - `src/lib/supabase/browser.ts` (browser client, public anon key)
-  - `src/lib/supabase/server.ts` (cookie-based SSR client)
-  - `src/server/admin.ts` (restricted service-role client with `import 'server-only'`)
-- [x] Verified clean builds across all standing commands:
-  - `npm run typecheck`: PASS (0 errors)
-  - `npm test`: PASS (1 file, 3 tests)
-  - `npm run lint`: PASS (0 errors, 0 warnings)
-  - `npm run build`: PASS (all 8 routes compiled statically / dynamically; shared JS 103 kB)
-- [x] Created commit `977a810` and git tag `work-1-done`.
+### Done in Work 2
+- [x] Drafted initial foundation migration `supabase/migrations/20261025000001_foundation.sql`:
+  - Extensions: `pgcrypto`, `pg_trgm`
+  - Enum: `org_role ('owner', 'admin', 'issuer', 'viewer')`
+  - 6 initial tables: `orgs`, `org_members`, `invitations`, `signatories`, `platform_admins`, `audit_logs`
+  - Security Definer helper functions: `is_member(_org uuid)`, `has_role(_org uuid, _roles org_role[])`
+- [x] Audited migration via `db-security-reviewer` subagent:
+  - Identified & resolved SQL scope shadowing bug in `org_members` delete policy.
+  - Added last-owner demotion protection in `org_members` update policy.
+  - Restricted invitation updates to owner/admin to prevent role escalation.
+  - Hardened audit log insert policy to enforce `actor_id = auth.uid()` and organization membership.
+  - Added unique index on `invitations.token_hash`.
+- [x] Implemented server authority helpers in `src/server/auth.ts`:
+  - `requireUser()`: strictly enforces authenticated session.
+  - `requireRole(orgId, allowedRoles)`: verifies server-side membership and RBAC.
+  - `audit(orgId, action, meta)`: records immutable audit trail using admin service-role client.
+- [x] Created Zod validation schemas in `src/lib/schemas/org.ts` (`createOrgSchema`, `updateOrgSchema`).
+- [x] Built server actions in `src/features/org/actions.ts` (`createOrganizationAction`, `getUserOrganizationsAction`).
+- [x] Implemented authentication server actions in `src/features/auth/actions.ts` (Email OTP, Verify OTP, Google OAuth, Sign Out).
+- [x] Configured session refresh and route protection in `middleware.ts` (protects `/app`, `/admin`, `/onboarding`).
+- [x] Built Auth callback route handler in `src/app/auth/callback/route.ts`.
+- [x] Created interactive `/login` page with 6-digit OTP code input and Google sign-in.
+- [x] Created 2-step `/onboarding` wizard for organization creation.
+- [x] Created authenticated app shell in `src/app/(app)/app/layout.tsx` featuring dynamic `OrgSwitcher`.
+- [x] Created Home dashboard view in `src/app/(app)/app/page.tsx` displaying live org balance and quick actions.
+- [x] Verified builds and tests:
+  - `npm test`: 7/7 unit tests passing
+  - `npm run typecheck`: clean (0 errors)
+  - `npm run build`: 10 static and dynamic routes compiled successfully
+- [x] Created commit `9537f32` and git tag `work-2-done`.
 
 ---
 
 ### Decisions
-- 2026-10-25: Adopted strict Feature-Driven Modular Monolith per `architecture.md` ADR 1 and Work 1 specifications.
-- 2026-10-25: Enforced `server-only` import barriers preventing accidental client bundle leaks of the service-role key.
+- 2026-10-25: Aliased subqueries in `org_members` RLS policies (`m.org_id = org_members.org_id`) to prevent cross-organization owner counting bugs identified during subagent review.
+- 2026-10-25: Configured passwordless Email OTP as primary auth path with optional Google OAuth.
 
 ---
 
-### Conflicts / Blockers
-1. **Live Supabase Credentials**:
-   - [x] Configured and verified with live project `hydvivhoetmxtvvqxkuc`.
-   - [x] Auth and Admin service-role endpoints confirmed responsive.
-
----
-
-### Exit gate — Work 1
-- [x] `npm run lint && npm run typecheck && npm test && npm run build` — all pass cleanly
-- [x] Deliberate bad import (ui → server) fails lint (verified and reverted)
-- [x] Tag created: `work-1-done`
+### Exit gate — Work 2
+- [x] Migration SQL created with strict RLS on all 6 tables
+- [x] db-security-reviewer audit passed
+- [x] Auth callback and middleware operational
+- [x] Org creation server actions and Zod schemas tested
+- [x] Production build passes cleanly
+- [x] Tag created: `work-2-done`
 
 ---
 
 ### Next
-- Next step is **Work 2: Foundation (database, auth, organizations, app shell)**:
-  - Add initial Supabase migrations for `orgs`, `org_members`, `invitations`, `signatories`, `platform_admins`, `audit_logs`.
-  - Implement RLS helper functions (`is_member`, `has_role`) and policies.
-  - Setup authentication flows (Email OTP + Google).
-  - Build basic `(app)` shell and org onboarding.
+- Next step is **WORK 3: ARCHITECTURE LOCK (freeze the foundations)**:
+  - Create `ARCHITECTURE_LOCK.md` containing frozen stack versions, schema contracts, security rules, module interface stubs, ID formats, and job payloads.
+  - Implement module interface stubs (`renderCertificate`, `sendEmail`, `enqueueJob`, `applyCreditDelta`, `createOrder`, `buildExport`).
+  - Add CI guard scripts (grep checks for secret leaks, hex colors outside tokens, tables without RLS, allowlist dependencies).

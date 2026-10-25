@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { colors } from "@/lib/tokens";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -9,8 +10,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F5F5F7" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+    { media: "(prefers-color-scheme: light)", color: colors.canvas.light },
+    { media: "(prefers-color-scheme: dark)", color: colors.canvas.dark },
   ],
   width: "device-width",
   initialScale: 1,
