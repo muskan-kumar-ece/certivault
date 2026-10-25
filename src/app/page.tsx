@@ -77,10 +77,10 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="pt-12 sm:pt-16 pb-12 px-4 sm:px-6 lg:px-8 text-center max-w-4xl mx-auto space-y-6">
+      <section className="pt-12 sm:pt-16 pb-10 px-4 sm:px-6 lg:px-8 text-center max-w-4xl mx-auto space-y-6">
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-surface border border-hairline text-ink-secondary text-xs font-medium shadow-2xs">
           <span className="w-2 h-2 rounded-full bg-verified animate-pulse" />
-          <span>Mumbai Edge (ap-south-1) · 40ms Engine · Zero PII Leaks</span>
+          <span>Mumbai Region (ap-south-1) · 40ms Engine · Zero PII Leaks</span>
         </div>
 
         <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-ink leading-[1.08] max-w-3xl mx-auto">
@@ -105,41 +105,33 @@ export default function HomePage() {
             </Button>
           </Link>
         </div>
-
-        {/* High-Contrast Stat Strip */}
-        <div className="pt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto border-t border-hairline text-left">
-          <div className="space-y-0.5">
-            <p className="text-2xl font-black text-ink tabular-nums">40 ms</p>
-            <p className="text-xs text-ink-secondary font-medium">PDF render latency</p>
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-2xl font-black text-ink tabular-nums">&lt; 1.2 s</p>
-            <p className="text-xs text-ink-secondary font-medium">Public QR verification</p>
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-2xl font-black text-ink tabular-nums">18% GST</p>
-            <p className="text-xs text-ink-secondary font-medium">Automated FY tax invoices</p>
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-2xl font-black text-ink tabular-nums">100% Free</p>
-            <p className="text-xs text-ink-secondary font-medium">Verification for recruiters</p>
-          </div>
-        </div>
       </section>
 
       {/* Heroic Live Certificate Studio Showcase */}
-      <section id="demo" className="py-12 px-4 sm:px-6 lg:px-8 border-y border-hairline bg-surface/40 text-center">
-        <div className="max-w-4xl mx-auto mb-8 space-y-2">
-          <Badge variant="verified">Live Interactive Studio</Badge>
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-ink">
-            Experience the Vector PDF Engine
-          </h2>
-          <p className="text-xs sm:text-sm text-ink-secondary max-w-lg mx-auto">
-            Type below or switch presets. Watch CertiVault render dynamic typography, multi-lingual scripts, and cryptographic QR codes in real-time.
-          </p>
-        </div>
-
+      <section id="demo" className="py-8 px-4 sm:px-6 lg:px-8 text-center">
         <LiveCertificateDemo />
+      </section>
+
+      {/* High-Contrast Stat Strip */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8 border-y border-hairline bg-surface/30">
+        <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-4 text-left">
+          <div className="space-y-1">
+            <p className="text-3xl font-black text-ink tabular-nums">40 ms</p>
+            <p className="text-xs text-ink-secondary font-medium">PDF render latency</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-3xl font-black text-ink tabular-nums">&lt; 1.2 s</p>
+            <p className="text-xs text-ink-secondary font-medium">Public QR verification</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-3xl font-black text-ink tabular-nums">18% GST</p>
+            <p className="text-xs text-ink-secondary font-medium">Automated FY tax invoices</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-3xl font-black text-ink tabular-nums">100% Free</p>
+            <p className="text-xs text-ink-secondary font-medium">Verification for recruiters</p>
+          </div>
+        </div>
       </section>
 
       {/* Asymmetric Bento Grid Features Section */}
@@ -150,7 +142,7 @@ export default function HomePage() {
             Built for High-Stakes Campus Trust
           </h2>
           <p className="text-sm text-ink-secondary">
-            Everything your hackathon, college fest, or exam cell needs to eliminate manual Canva assembly and permanently eliminate credential fraud.
+            Everything your hackathon, college fest, or exam cell needs to eliminate manual Canva assembly and permanently stop credential fraud.
           </p>
         </div>
 
@@ -309,7 +301,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
-            <div className="p-6 rounded-2xl bg-surface border border-hairline space-y-3 relative">
+            <div className="p-6 rounded-2xl bg-surface border border-hairline space-y-3 relative shadow-xs">
               <span className="w-7 h-7 rounded-full bg-accent/10 text-accent font-black text-xs flex items-center justify-center">
                 1
               </span>
@@ -319,7 +311,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-surface border border-hairline space-y-3 relative">
+            <div className="p-6 rounded-2xl bg-surface border border-hairline space-y-3 relative shadow-xs">
               <span className="w-7 h-7 rounded-full bg-accent/10 text-accent font-black text-xs flex items-center justify-center">
                 2
               </span>
@@ -329,7 +321,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-surface border border-hairline space-y-3 relative">
+            <div className="p-6 rounded-2xl bg-surface border border-hairline space-y-3 relative shadow-xs">
               <span className="w-7 h-7 rounded-full bg-verified/10 text-verified font-black text-xs flex items-center justify-center">
                 3
               </span>
@@ -495,7 +487,7 @@ export default function HomePage() {
           <p className="text-sm text-ink-secondary">Common questions about verification, delivery, and institutional compliance.</p>
         </div>
 
-        <div className="space-y-4 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-left">
           <div className="p-5 rounded-2xl border border-hairline bg-surface space-y-2">
             <h3 className="text-sm font-bold text-ink">Do recipients need to create an account to view or download?</h3>
             <p className="text-ink-secondary leading-relaxed">
@@ -522,6 +514,38 @@ export default function HomePage() {
             <p className="text-ink-secondary leading-relaxed">
               Yes. Universities and colleges can request a formal Proforma Invoice and remit payment via institutional bank transfer (NEFT/RTGS). Our platform administrators manually credit the account upon receipt.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Closing Call to Action Banner */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full text-center">
+        <div className="p-8 sm:p-12 rounded-3xl bg-surface border border-hairline shadow-md space-y-6">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-verified/10 text-verified text-xs font-semibold">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>Ready in under 5 minutes</span>
+          </div>
+
+          <h2 className="text-3xl sm:text-4xl font-black text-ink tracking-tight max-w-xl mx-auto">
+            Issue your first 50 verified certificates today.
+          </h2>
+
+          <p className="text-sm text-ink-secondary max-w-lg mx-auto">
+            No credit card required. Free 50 credits automatically included on your account on sign-up.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <Link href="/login" className="w-full sm:w-auto">
+              <Button size="lg" variant="primary" className="w-full sm:w-auto px-8 text-sm font-semibold rounded-full shadow-md">
+                Get Started Free
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+            <Link href="/verify" className="w-full sm:w-auto">
+              <Button size="lg" variant="secondary" className="w-full sm:w-auto px-6 text-sm font-medium rounded-full">
+                Verify a Demo ID
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

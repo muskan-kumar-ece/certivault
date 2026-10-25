@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export type DemoTheme = "navy" | "gold" | "minimal" | "bilingual";
+export type DemoTheme = "gold" | "navy" | "minimal" | "bilingual";
 
 export function LiveCertificateDemo() {
   const [recipientName, setRecipientName] = useState("Aarav Sharma");
@@ -25,19 +25,19 @@ export function LiveCertificateDemo() {
   const sampleId = "CV-26-7K3M9QXT";
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6">
-      {/* Studio Control Header */}
-      <div className="bg-surface rounded-2xl border border-hairline p-4 sm:p-5 shadow-xs space-y-4">
-        {/* Preset Selector Tabs */}
+    <div className="w-full max-w-4xl mx-auto space-y-6">
+      {/* Studio Control Toolbar */}
+      <div className="bg-surface rounded-2xl border border-hairline p-3.5 sm:p-5 shadow-xs space-y-4 text-left">
+        {/* Top Preset Buttons */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-hairline">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-verified animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-verified animate-pulse" />
             <span className="text-xs font-bold uppercase tracking-wider text-ink-secondary">
-              Interactive Design Studio
+              Interactive Studio
             </span>
-            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-accent bg-accent/10 px-2 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-accent bg-accent/10 px-2 py-0.5 rounded-full">
               <Sparkles className="w-3 h-3" />
-              Real-time Vector Render
+              40ms Vector Render
             </span>
           </div>
 
@@ -82,10 +82,13 @@ export function LiveCertificateDemo() {
           </div>
         </div>
 
-        {/* Live Input Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+        {/* 3 Responsive Input Fields */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label htmlFor="demo-recipient-name" className="block text-[11px] font-semibold uppercase tracking-wider text-ink-secondary mb-1">
+            <label
+              htmlFor="demo-recipient-name"
+              className="block text-[11px] font-semibold uppercase tracking-wider text-ink-secondary mb-1"
+            >
               Recipient Name
             </label>
             <input
@@ -101,7 +104,10 @@ export function LiveCertificateDemo() {
           </div>
 
           <div>
-            <label htmlFor="demo-award-title" className="block text-[11px] font-semibold uppercase tracking-wider text-ink-secondary mb-1">
+            <label
+              htmlFor="demo-award-title"
+              className="block text-[11px] font-semibold uppercase tracking-wider text-ink-secondary mb-1"
+            >
               Distinction / Title
             </label>
             <input
@@ -117,7 +123,10 @@ export function LiveCertificateDemo() {
           </div>
 
           <div>
-            <label htmlFor="demo-org-name" className="block text-[11px] font-semibold uppercase tracking-wider text-ink-secondary mb-1">
+            <label
+              htmlFor="demo-org-name"
+              className="block text-[11px] font-semibold uppercase tracking-wider text-ink-secondary mb-1"
+            >
               Issuing Organization
             </label>
             <input
@@ -134,8 +143,8 @@ export function LiveCertificateDemo() {
         </div>
       </div>
 
-      {/* Heroic Dimensional Certificate Preview */}
-      <div className="flex justify-center p-2 sm:p-4">
+      {/* Floating Dimensional Certificate Canvas */}
+      <div className="flex justify-center p-1 sm:p-2">
         <div
           className={`w-full max-w-3xl aspect-[1.414/1] rounded-2xl p-6 sm:p-10 flex flex-col justify-between border transition-all duration-300 relative overflow-hidden shadow-2xl ${
             templateTheme === "navy"
@@ -147,10 +156,10 @@ export function LiveCertificateDemo() {
               : "bg-surface border-hairline text-ink"
           }`}
         >
-          {/* Authentic Certificate Guilloche / Background Pattern */}
+          {/* Subtle Security Guilloche Pattern */}
           <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none bg-[radial-gradient(currentColor_1px,transparent_1px)] [background-size:16px_16px]" />
 
-          {/* Ornate Frame Border */}
+          {/* Ornate Framing Borders */}
           <div className="absolute inset-3 sm:inset-4 border-2 border-current opacity-20 rounded-lg pointer-events-none" />
           <div className="absolute inset-4 sm:inset-5 border border-current opacity-10 rounded-md pointer-events-none" />
 
@@ -200,7 +209,7 @@ export function LiveCertificateDemo() {
             </p>
           </div>
 
-          {/* Bottom Footprint: Signatory & Vector QR */}
+          {/* Bottom Footprint: Signatory, Seal, and Vector QR */}
           <div className="flex items-end justify-between pt-3 sm:pt-4 border-t border-current border-opacity-15 relative z-10 text-[10px] sm:text-xs">
             <div className="text-left space-y-1">
               <div className="w-24 sm:w-36 border-b border-current opacity-40" />
@@ -229,7 +238,7 @@ export function LiveCertificateDemo() {
         </div>
       </div>
 
-      {/* Studio Footer Quick Links */}
+      {/* Studio Action Strip */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-2 pt-1 text-xs text-ink-secondary">
         <div className="flex items-center gap-1.5">
           <ShieldCheck className="w-4 h-4 text-verified" />
