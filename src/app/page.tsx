@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LiveCertificateDemo } from "@/components/marketing/live-demo";
+import { SiteFooter } from "@/components/marketing/site-footer";
 
 export const metadata = {
   title: "CertiVault — Issue 1,000 Verified Certificates in 5 Minutes",
@@ -550,46 +551,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="mt-auto border-t border-hairline bg-surface py-12 px-4 sm:px-6 lg:px-8 text-xs text-ink-secondary">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2">
-            <span className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-white font-bold text-xs">
-              CV
-            </span>
-            <span className="font-bold text-ink text-sm">CertiVault</span>
-            <span className="text-[11px] text-ink-secondary">
-              · Cryptographic Credential Infrastructure
-            </span>
-          </div>
-
-          {/* Legal and nav links */}
-          <div className="flex flex-wrap items-center justify-center gap-6 text-[11px]">
-            <Link href="/pricing" className="hover:text-ink transition-colors">
-              Pricing
-            </Link>
-            <Link href="/verify" className="hover:text-ink transition-colors">
-              Verify QR
-            </Link>
-            <Link href="/terms" className="hover:text-ink transition-colors">
-              Terms of Service
-            </Link>
-            <Link href="/privacy" className="hover:text-ink transition-colors">
-              Privacy Policy
-            </Link>
-            <Link href="/refund" className="hover:text-ink transition-colors">
-              Refund Policy
-            </Link>
-            <Link href="/contact" className="hover:text-ink transition-colors">
-              Contact & Support
-            </Link>
-          </div>
-
-          <p className="text-[11px] text-ink-secondary">
-            © {new Date().getFullYear()} CertiVault Technologies. Hosted in Mumbai (ap-south-1).
-          </p>
-        </div>
-      </footer>
+      {/* Dedicated Site Footer */}
+      <SiteFooter />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { Search, ArrowRight, ShieldCheck, AlertCircle, ArrowLeft, CheckCircle2 }
 import { Button } from "@/components/ui/button";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { useToast } from "@/components/ui/toast";
+import { SiteFooter } from "@/components/marketing/site-footer";
 
 export default function VerifyLookupPage() {
   const router = useRouter();
@@ -111,22 +112,23 @@ export default function VerifyLookupPage() {
   }, [mode, startCamera, stopCamera]);
 
   return (
-    <main className="min-h-screen bg-canvas flex flex-col items-center justify-center p-4 sm:p-6 relative">
-      {/* Top back navigation */}
-      <div className="w-full max-w-md flex items-center justify-between mb-6">
-        <Link
-          href="/"
-          className="text-xs text-ink-secondary hover:text-ink flex items-center gap-1.5 font-medium transition-colors press-feedback"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to CertiVault</span>
-        </Link>
+    <div className="min-h-screen flex flex-col bg-canvas text-ink">
+      <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 py-12 relative">
+        {/* Top back navigation */}
+        <div className="w-full max-w-md flex items-center justify-between mb-6">
+          <Link
+            href="/"
+            className="text-xs text-ink-secondary hover:text-ink flex items-center gap-1.5 font-medium transition-colors press-feedback"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to CertiVault</span>
+          </Link>
 
-        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-verified bg-verified/10 px-2.5 py-0.5 rounded-full">
-          <CheckCircle2 className="w-3 h-3" />
-          Public Ledger
-        </span>
-      </div>
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-verified bg-verified/10 px-2.5 py-0.5 rounded-full">
+            <CheckCircle2 className="w-3 h-3" />
+            Public Ledger
+          </span>
+        </div>
 
       <div className="w-full max-w-md bg-surface rounded-2xl border border-hairline p-6 sm:p-8 shadow-xl text-center space-y-6">
         {/* Header Icon */}
@@ -236,13 +238,15 @@ export default function VerifyLookupPage() {
         )}
       </div>
 
-      <div className="mt-8 text-xs text-ink-secondary flex items-center gap-1.5">
-        <span>Powered by</span>
-        <Link href="/" className="font-semibold text-ink hover:underline">
-          CertiVault Trust Engine
-        </Link>
-        <span>· Mumbai Region</span>
-      </div>
-    </main>
+        <div className="mt-8 text-xs text-ink-secondary flex items-center gap-1.5">
+          <span>Powered by</span>
+          <Link href="/" className="font-semibold text-ink hover:underline">
+            CertiVault Trust Engine
+          </Link>
+          <span>· Mumbai Region</span>
+        </div>
+      </main>
+      <SiteFooter />
+    </div>
   );
 }
