@@ -299,10 +299,12 @@ export function PublicVerifyClient({
       >
         <form onSubmit={handleSubmitReport} className="space-y-4 py-2">
           <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
+            <label htmlFor="report-reason" className="text-xs font-semibold text-ink block mb-1">
               Reason for Report
             </label>
             <select
+              id="report-reason"
+              name="reportReason"
               value={reportReason}
               onChange={(e) => setReportReason(e.target.value as "fraudulent" | "incorrect_info" | "impersonation" | "offensive" | "other")}
               className="w-full h-10 px-3 text-sm rounded-control border border-hairline bg-canvas text-ink focus:outline-none focus:ring-2 focus:ring-accent"
@@ -316,10 +318,12 @@ export function PublicVerifyClient({
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
+            <label htmlFor="report-details" className="text-xs font-semibold text-ink block mb-1">
               Details (Optional)
             </label>
             <textarea
+              id="report-details"
+              name="reportDetails"
               rows={3}
               value={reportDetails}
               onChange={(e) => setReportDetails(e.target.value)}
@@ -329,10 +333,12 @@ export function PublicVerifyClient({
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
+            <label htmlFor="report-email" className="text-xs font-semibold text-ink block mb-1">
               Your Email (Optional, for updates)
             </label>
             <input
+              id="report-email"
+              name="reportEmail"
               type="email"
               value={reportEmail}
               onChange={(e) => setReportEmail(e.target.value)}

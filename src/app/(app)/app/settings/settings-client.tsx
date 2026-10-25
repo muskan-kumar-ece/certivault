@@ -181,11 +181,13 @@ export function SettingsClientView({
             />
 
             <div className="space-y-1.5 text-left">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-ink-secondary">
+              <label htmlFor="settings-brand-color" className="block text-xs font-semibold uppercase tracking-wider text-ink-secondary">
                 Brand Accent Color
               </label>
               <div className="flex items-center gap-3">
                 <input
+                  id="settings-brand-color"
+                  name="brandColor"
                   type="color"
                   disabled={!isPrivileged}
                   value={brandColor}

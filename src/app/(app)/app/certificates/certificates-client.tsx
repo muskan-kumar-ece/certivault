@@ -353,10 +353,14 @@ export function CertificatesClientView({
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-ink-secondary absolute left-3 top-1/2 -translate-y-1/2" />
               <input
+                id="cert-search-input"
+                name="search"
+                aria-label="Search certificates by recipient name, email, or ID"
                 type="text"
                 placeholder="Search by recipient name, email, or ID (e.g. CV-26-...)"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                autoComplete="off"
                 className="w-full h-10 pl-9 pr-4 text-xs rounded-control border border-hairline bg-surface text-ink placeholder:text-ink-secondary focus:outline-none focus:ring-2 focus:ring-accent"
               />
             </div>
@@ -703,10 +707,12 @@ export function CertificatesClientView({
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-ink block mb-1">
+              <label htmlFor="revoke-reason-input" className="text-xs font-semibold text-ink block mb-1">
                 Revocation Reason (Required)
               </label>
               <textarea
+                id="revoke-reason-input"
+                name="revokeReason"
                 rows={3}
                 value={revokeReason}
                 onChange={(e) => setRevokeReason(e.target.value)}
@@ -715,8 +721,10 @@ export function CertificatesClientView({
               />
             </div>
 
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label htmlFor="show-reason-checkbox" className="flex items-center gap-2 cursor-pointer">
               <input
+                id="show-reason-checkbox"
+                name="showRevokeReason"
                 type="checkbox"
                 checked={showRevokeReason}
                 onChange={(e) => setShowRevokeReason(e.target.checked)}

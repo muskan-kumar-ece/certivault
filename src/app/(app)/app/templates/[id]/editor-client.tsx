@@ -335,8 +335,10 @@ export function TemplateEditorClientView({
                   {field.type === "text" && (
                     <div className="grid grid-cols-2 gap-2 pt-1">
                       <div>
-                        <span className="text-[10px] text-ink-secondary block">Font</span>
+                        <label htmlFor={`font-name-${idx}`} className="text-[10px] text-ink-secondary block">Font</label>
                         <select
+                          id={`font-name-${idx}`}
+                          name={`fontName_${idx}`}
                           disabled={isPreset || !isPrivileged}
                           value={field.fontName || "Inter"}
                           onChange={(e) =>
@@ -352,8 +354,10 @@ export function TemplateEditorClientView({
                       </div>
 
                       <div>
-                        <span className="text-[10px] text-ink-secondary block">Font Size (pt)</span>
+                        <label htmlFor={`font-size-${idx}`} className="text-[10px] text-ink-secondary block">Font Size (pt)</label>
                         <input
+                          id={`font-size-${idx}`}
+                          name={`fontSize_${idx}`}
                           type="number"
                           disabled={isPreset || !isPrivileged}
                           value={field.fontSize || 12}

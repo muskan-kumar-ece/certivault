@@ -436,10 +436,12 @@ export function CertificateDetailClientView({
       >
         <div className="space-y-4 py-2">
           <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
+            <label htmlFor="revoke-reason-textarea" className="text-xs font-semibold text-ink block mb-1">
               Revocation Reason (Required)
             </label>
             <textarea
+              id="revoke-reason-textarea"
+              name="revokeReason"
               rows={3}
               value={revokeReason}
               onChange={(e) => setRevokeReason(e.target.value)}
@@ -448,8 +450,10 @@ export function CertificateDetailClientView({
             />
           </div>
 
-          <label className="flex items-center gap-2 cursor-pointer">
+          <label htmlFor="show-public-reason-checkbox" className="flex items-center gap-2 cursor-pointer">
             <input
+              id="show-public-reason-checkbox"
+              name="showPublicReason"
               type="checkbox"
               checked={showPublicReason}
               onChange={(e) => setShowPublicReason(e.target.checked)}
@@ -459,8 +463,10 @@ export function CertificateDetailClientView({
           </label>
 
           {certificate.recipient_email && (
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label htmlFor="notify-recipient-checkbox" className="flex items-center gap-2 cursor-pointer">
               <input
+                id="notify-recipient-checkbox"
+                name="notifyRecipient"
                 type="checkbox"
                 checked={notifyRecipient}
                 onChange={(e) => setNotifyRecipient(e.target.checked)}
@@ -497,14 +503,17 @@ export function CertificateDetailClientView({
       >
         <div className="space-y-4 py-2">
           <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
+            <label htmlFor="cert-correct-recipient-name" className="text-xs font-semibold text-ink block mb-1">
               Recipient Full Name
             </label>
             <input
+              id="cert-correct-recipient-name"
+              name="newName"
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="Corrected Name"
+              autoComplete="off"
               className="w-full h-10 px-3 text-xs rounded-control border border-hairline bg-canvas text-ink focus:outline-none focus:ring-2 focus:ring-accent"
             />
             <p className="text-[11px] text-ink-secondary mt-1">

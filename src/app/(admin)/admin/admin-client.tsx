@@ -281,10 +281,14 @@ export function AdminClient({
           <div className="relative flex-1 sm:w-64">
             <Search className="w-3.5 h-3.5 text-ink-secondary absolute left-3 top-1/2 -translate-y-1/2" />
             <input
+              id="admin-org-search"
+              name="search"
+              aria-label="Search organizations"
               type="text"
               placeholder="Search org or slug..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              autoComplete="off"
               className="w-full text-xs pl-8 pr-3 py-1.5 rounded-control bg-surface border border-hairline text-ink focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </div>

@@ -155,10 +155,14 @@ function VerifyLookupContent() {
             <div>
               <div className="relative">
                 <input
+                  id="public-id-input"
+                  name="publicId"
+                  aria-label="Certificate Public ID"
                   type="text"
                   value={publicIdInput}
                   onChange={(e) => setPublicIdInput(e.target.value)}
                   placeholder="CV-26-7K3M9QXT"
+                  autoComplete="off"
                   className="w-full h-12 px-4 rounded-control bg-canvas border border-hairline text-ink font-mono uppercase text-center text-base tracking-widest placeholder:tracking-normal placeholder:font-sans placeholder:normal-case focus:outline-none focus:ring-2 focus:ring-accent"
                 />
               </div>

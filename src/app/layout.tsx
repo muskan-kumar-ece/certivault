@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { colors } from "@/lib/tokens";
+import { ToastProvider } from "@/components/ui/toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -37,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className="h-full font-sans antialiased bg-canvas text-ink flex flex-col">
-        {children}
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );

@@ -769,13 +769,16 @@ export function IssueWizardClient({
 
               <div className="bg-surface rounded-card p-6 border border-hairline shadow-sm space-y-6">
                 <div>
-                  <label className="text-sm font-semibold text-ink mb-1.5 block">
+                  <label htmlFor="issue-batch-name" className="text-sm font-semibold text-ink mb-1.5 block">
                     Batch Name
                   </label>
                   <input
+                    id="issue-batch-name"
+                    name="batchName"
                     type="text"
                     value={batchName}
                     onChange={(e) => setBatchName(e.target.value)}
+                    autoComplete="off"
                     className="w-full h-11 px-3 text-sm rounded-control border border-hairline bg-canvas text-ink focus:outline-none focus:ring-2 focus:ring-accent"
                     placeholder="e.g. Annual Symposium 2026"
                   />
@@ -798,21 +801,26 @@ export function IssueWizardClient({
                 {deliveryMode === "email" && (
                   <div className="space-y-4 pt-4 border-t border-hairline">
                     <div>
-                      <label className="text-sm font-semibold text-ink mb-1.5 block">
+                      <label htmlFor="issue-email-subject" className="text-sm font-semibold text-ink mb-1.5 block">
                         Email Subject
                       </label>
                       <input
+                        id="issue-email-subject"
+                        name="emailSubject"
                         type="text"
                         value={emailSubject}
                         onChange={(e) => setEmailSubject(e.target.value)}
+                        autoComplete="off"
                         className="w-full h-10 px-3 text-sm rounded-control border border-hairline bg-canvas text-ink focus:outline-none focus:ring-2 focus:ring-accent"
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-semibold text-ink mb-1.5 block">
+                      <label htmlFor="issue-email-body" className="text-sm font-semibold text-ink mb-1.5 block">
                         Email Message
                       </label>
                       <textarea
+                        id="issue-email-body"
+                        name="emailBody"
                         rows={3}
                         value={emailBody}
                         onChange={(e) => setEmailBody(e.target.value)}

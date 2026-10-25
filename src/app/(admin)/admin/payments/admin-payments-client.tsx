@@ -58,10 +58,14 @@ export function AdminPaymentsClient({
         <div className="relative flex-1 max-w-sm">
           <Search className="w-3.5 h-3.5 text-ink-secondary absolute left-3 top-1/2 -translate-y-1/2" />
           <input
+            id="admin-payments-search"
+            name="search"
+            aria-label="Search by Org, Payment ID, or Order ID"
             type="text"
             placeholder="Search by Org, Payment ID, or Order ID..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            autoComplete="off"
             className="w-full text-xs pl-8 pr-3 py-2 rounded-control bg-surface border border-hairline text-ink focus:outline-none focus:ring-1 focus:ring-accent"
           />
         </div>

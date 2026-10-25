@@ -264,10 +264,14 @@ export function BatchDetailClientView({
           <div className="relative flex-1 max-w-sm">
             <Search className="w-4 h-4 text-ink-secondary absolute left-3 top-1/2 -translate-y-1/2" />
             <input
+              id="batch-recipient-search"
+              name="search"
+              aria-label="Search recipients in this batch"
               type="text"
               placeholder="Search recipients in this batch..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              autoComplete="off"
               className="w-full h-9 pl-9 pr-3 text-xs rounded-control border border-hairline bg-surface text-ink placeholder:text-ink-secondary focus:outline-none focus:ring-2 focus:ring-accent"
             />
           </div>

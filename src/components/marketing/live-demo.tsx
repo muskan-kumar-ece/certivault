@@ -36,35 +36,50 @@ export function LiveCertificateDemo() {
 
         <div className="space-y-3.5 text-xs">
           <div>
-            <label className="block font-medium text-ink mb-1">Recipient Full Name</label>
+            <label htmlFor="demo-recipient-name" className="block font-medium text-ink mb-1">
+              Recipient Full Name
+            </label>
             <input
+              id="demo-recipient-name"
+              name="recipientName"
               type="text"
               value={recipientName}
               onChange={(e) => setRecipientName(e.target.value)}
               className="w-full text-xs px-3 py-2 rounded-control bg-canvas border border-hairline text-ink focus:outline-none focus:ring-1 focus:ring-accent"
               placeholder="e.g. Aarav Sharma"
+              autoComplete="off"
             />
           </div>
 
           <div>
-            <label className="block font-medium text-ink mb-1">Award / Course Title</label>
+            <label htmlFor="demo-award-title" className="block font-medium text-ink mb-1">
+              Award / Course Title
+            </label>
             <input
+              id="demo-award-title"
+              name="awardTitle"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full text-xs px-3 py-2 rounded-control bg-canvas border border-hairline text-ink focus:outline-none focus:ring-1 focus:ring-accent"
               placeholder="e.g. Hackathon Winner"
+              autoComplete="off"
             />
           </div>
 
           <div>
-            <label className="block font-medium text-ink mb-1">Issuing Organization</label>
+            <label htmlFor="demo-org-name" className="block font-medium text-ink mb-1">
+              Issuing Organization
+            </label>
             <input
+              id="demo-org-name"
+              name="orgName"
               type="text"
               value={orgName}
               onChange={(e) => setOrgName(e.target.value)}
               className="w-full text-xs px-3 py-2 rounded-control bg-canvas border border-hairline text-ink focus:outline-none focus:ring-1 focus:ring-accent"
               placeholder="e.g. College Name"
+              autoComplete="off"
             />
           </div>
 

@@ -69,6 +69,9 @@ export function FileDropZone({
     >
       <input
         ref={inputRef}
+        id="file-dropzone-input"
+        name="file"
+        aria-label="Upload spreadsheet or file"
         type="file"
         accept={accept}
         onChange={(e) => {

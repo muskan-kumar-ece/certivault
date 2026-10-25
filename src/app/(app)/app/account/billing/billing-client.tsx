@@ -298,36 +298,44 @@ export function BillingClientView({
 
         <form onSubmit={handleSaveGst} className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
           <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
+            <label htmlFor="billing-gstin" className="text-xs font-semibold text-ink block mb-1">
               GSTIN (15 characters)
             </label>
             <input
+              id="billing-gstin"
+              name="gstin"
               type="text"
               value={gstin}
               onChange={(e) => setGstin(e.target.value.toUpperCase())}
               placeholder="27AAAAA0000A1Z5"
+              autoComplete="off"
               className="w-full h-10 px-3 text-xs font-mono uppercase rounded-control border border-hairline bg-canvas text-ink focus:outline-none focus:ring-2 focus:ring-accent"
             />
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
+            <label htmlFor="billing-legal-name" className="text-xs font-semibold text-ink block mb-1">
               Legal Entity / College Name
             </label>
             <input
+              id="billing-legal-name"
+              name="legalName"
               type="text"
               value={legalName}
               onChange={(e) => setLegalName(e.target.value)}
               placeholder="Acme College of Engineering"
+              autoComplete="off"
               className="w-full h-10 px-3 text-xs rounded-control border border-hairline bg-canvas text-ink focus:outline-none focus:ring-2 focus:ring-accent"
             />
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
+            <label htmlFor="billing-state" className="text-xs font-semibold text-ink block mb-1">
               State of Registration
             </label>
             <select
+              id="billing-state"
+              name="state"
               value={state}
               onChange={(e) => setState(e.target.value)}
               className="w-full h-10 px-3 text-xs rounded-control border border-hairline bg-canvas text-ink focus:outline-none focus:ring-2 focus:ring-accent"
@@ -345,14 +353,17 @@ export function BillingClientView({
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
+            <label htmlFor="billing-address" className="text-xs font-semibold text-ink block mb-1">
               Registered Billing Address
             </label>
             <input
+              id="billing-address"
+              name="billingAddress"
               type="text"
               value={billingAddress}
               onChange={(e) => setBillingAddress(e.target.value)}
               placeholder="Campus Rd, Tech Park, City, PIN"
+              autoComplete="off"
               className="w-full h-10 px-3 text-xs rounded-control border border-hairline bg-canvas text-ink focus:outline-none focus:ring-2 focus:ring-accent"
             />
           </div>
