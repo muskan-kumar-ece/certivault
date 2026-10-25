@@ -216,10 +216,68 @@ Tag: work-5-done
 
 ---
 
+### Work 9: Registry, revoke/correct, and bulk export (Completed 2026-10-25)
+- [x] Branch: `work-9/registry-and-export`
+- [x] Migration `supabase/migrations/20261025000007_exports_and_revocation.sql`:
+  - `exports` table with `kind` (`zip`, `merged_pdf`, `report_csv`, `links_csv`), `status` (`queued`, `running`, `ready`, `failed`, `expired`), and 7-day expiration.
+  - Multi-tenant RLS on `exports` (select for org members, insert for owner/admin/issuer, update/delete for owner/admin).
+  - Private `exports` storage bucket (500MB limit, allowed MIME types).
+  - Tenant-scoped storage RLS policies on `storage.objects` for `exports` bucket (`exports_storage_select` and `exports_storage_delete`).
+  - Non-destructive `archived_pdfs jsonb not null default '[]'::jsonb` column on `certificates` for auditable correction and reissue history without primary key disruption.
+  - Audited and APPROVED by `db-security-reviewer`.
+- [x] Companion pgTAP test suite: `supabase/tests/20261025000007_exports_and_revocation_test.sql`.
+- [x] Bulk Export Engine in `src/server/export.ts`:
+  - Locked interface `buildExport(exportId)` fully implemented.
+  - `sanitizeCsvValue()` enforcing formula injection defense (escapes leading `=`, `+`, `-`, `@`, `\t`, `\r`).
+  - Non-Latin Unicode support (Hindi/Telugu scripts) preserved via UTF-8 with BOM (`\uFEFF`).
+  - Cross-platform filename sanitization (`sanitizeFilename()`).
+  - ZIP streaming with `fflate` into `{name}_{id}.pdf` bundles.
+  - Memory-safe merged PDF generation with `pdf-lib` page copying.
+  - Automatic 7-day expiration and background worker queue integration.
+- [x] Background Worker Queue `/api/worker`:
+  - `export` job processing invoking `buildExport(exportId)`.
+  - `cleanup` job processing expiring exports older than 7 days.
+- [x] Certificate Actions in `src/features/certificates/actions.ts`:
+  - `revokeCertificateAction` with required reason, optional public display, and optional recipient email notification.
+  - `correctCertificateAction` preserving the Base32 public ID (`CV-YY-XXXXXXXX`), archiving the superseded PDF, and re-rendering with new details.
+  - `requestExportAction` inserting an export request and enqueuing background job.
+  - `getExportsListAction` generating signed URLs for download.
+  - `retryFailedBatchAction` recovering failed batch certificates without duplicate credit charging.
+- [x] Certificates Registry UI:
+  - `/app/certificates`: SegmentedControl (Batches vs All Certificates), search input, status filter chips, multi-select mode with bulk export/revoke bar, and slide-over Exports history drawer.
+  - `/app/certificates/batch/[id]`: KPI metric cards (Total, Issued, Delivered, Failed, Downloads, Views), retry failed items banner, batch certificate list, and export batch trigger dialog.
+  - `/app/certificates/[id]`: Live PDF preview container, cryptographic SHA-256 fingerprint with copy action, correction version history, status timeline, and modals for revocation and correction.
+- [x] Automated Unit & Integration Tests in `src/test/registry-and-export.test.ts` (10 tests; total suite 58/58 passing).
+- [x] Verification Suite Passing:
+  - `npm run guard`: 4/4 checks passed.
+  - `npm run lint`: 0 errors.
+  - `npm run typecheck`: 0 errors.
+  - `npm test`: 58/58 tests passed across 8 test suites.
+  - `npm run build`: Production build succeeded; all 18 routes compiled cleanly.
+
+---
+
+### Exit gate — Work 9
+- [x] `exports` table and private bucket migration with RLS + pgTAP tests
+- [x] Subagent `db-security-reviewer` audit PASSED with storage object policies verified
+- [x] All 4 bulk export formats verified: ZIP of PDFs, print merged PDF, report CSV, share links CSV
+- [x] Formula injection attack vector sanitized with UTF-8 BOM encoding for Indian scripts
+- [x] Background worker handles `export` and `cleanup` jobs with 7-day expiration
+- [x] Non-destructive correction reissues certificate with same public ID and archives old PDF
+- [x] Revoke action invalidates certificate with reason sheet and optional email notification
+- [x] Certificates registry live at `/app/certificates`, batch detail at `/app/certificates/batch/[id]`, certificate detail at `/app/certificates/[id]`
+- [x] All 58 unit/integration tests green
+- [x] Production build passes cleanly with 0 errors
+- [x] Tag created: `work-9-done`
+
+---
+
 ### Next
-- Next step is **WORK 9: Registry, revoke/correct, and bulk export**:
-  - Certificates registry at `/app/certificates` (Batches vs All Certificates, trigram search, status filters, multi-select)
-  - Certificate detail at `/app/certificates/[id]` with status timeline, copy link, resend, revoke sheet, and correction reissue
-  - Bulk export job handler: ZIP (streamed with fflate), merged PDF (pdf-lib chunked), report CSV, share links CSV
-  - Migration: `exports` table + private `exports` storage bucket
-  - RLS policies and pgTAP tests for exports and certificate mutations
+- Next step is **WORK 10: Payments, plans, credits, and invoices**:
+  - Pricing config (pack_event: 500 certs @ ₹1,499; pack_club: 2,000 certs @ ₹4,499; pack_bulk: 10,000 certs @ ₹14,999; plan_campus: ₹49,999/year)
+  - Razorpay order creation server action with GST computation (18% intra/inter-state)
+  - Razorpay checkout integration with UPI priority on mobile
+  - Webhook `/api/webhooks/razorpay` with raw body HMAC-SHA256 signature verification and idempotent fulfillment
+  - Migration: `payments` table, `invoices` table, sequential invoice numbering (`CV/2026-27/000001`), private `invoices` bucket
+  - PDF invoice generator using the same PDF engine
+  - Billing UI at `/app/account/billing`

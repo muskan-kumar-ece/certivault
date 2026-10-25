@@ -5,6 +5,7 @@ import { claimJobs, markJobDone, markJobFailed } from "@/server/jobs";
 import { renderCertificate } from "@/server/pdf";
 import { storageUpload } from "@/server/storage";
 import { applyCreditDelta } from "@/server/payments";
+import { buildExport } from "@/server/export";
 
 export const maxDuration = 60; // 60s execution limit
 
@@ -38,8 +39,19 @@ export async function POST(req: NextRequest) {
             await handleGenerateChunk(job.payload, supabase);
             await markJobDone(job.id);
             processedCount++;
+          } else if (job.type === "export") {
+            const exportId = job.payload.export_id as string;
+            if (exportId) {
+              await buildExport(exportId);
+            }
+            await markJobDone(job.id);
+            processedCount++;
+          } else if (job.type === "cleanup") {
+            await handleCleanup(supabase);
+            await markJobDone(job.id);
+            processedCount++;
           } else {
-            // Placeholder for future job types (send_email_chunk, export, invoice)
+            // Placeholder for future job types (send_email_chunk, invoice)
             await markJobDone(job.id);
             processedCount++;
           }
@@ -245,4 +257,13 @@ async function handleGenerateChunk(
       })
       .eq("id", batchId);
   }
+}
+
+async function handleCleanup(supabase: ReturnType<typeof adminClient>) {
+  // Expire stale exports past 7 days
+  await supabase
+    .from("exports")
+    .update({ status: "expired" })
+    .eq("status", "ready")
+    .lt("expires_at", new Date().toISOString());
 }
