@@ -21,7 +21,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
-import { revokeCertificateAction, correctCertificateAction } from "@/features/certificates/actions";
+import {
+  revokeCertificateAction,
+  correctCertificateAction,
+  resendCertificateAction,
+} from "@/features/certificates/actions";
 
 interface CertificateDetailProps {
   orgId: string;
@@ -74,6 +78,23 @@ export function CertificateDetailClientView({
   const [isCorrectOpen, setIsCorrectOpen] = useState(false);
   const [newName, setNewName] = useState(certificate.recipient_name);
   const [isCorrecting, setIsCorrecting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+
+  const handleResendEmail = async () => {
+    setIsResending(true);
+    try {
+      const res = await resendCertificateAction(orgId, certificate.id);
+      if (res.success) {
+        showToast({ title: "Email Resent", description: "Certificate link delivered to recipient.", variant: "success" });
+      } else {
+        showToast({ title: "Delivery Error", description: res.message, variant: "error" });
+      }
+    } catch (err: unknown) {
+      showToast({ title: "Resend Error", description: err instanceof Error ? err.message : "Failed to resend", variant: "error" });
+    } finally {
+      setIsResending(false);
+    }
+  };
 
   const canManage = ["owner", "admin"].includes(userRole);
   const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://certivault.in"}/c/${certificate.public_id}`;
@@ -201,6 +222,19 @@ export function CertificateDetailClientView({
                 <span>Public Page</span>
               </Button>
             </a>
+
+            {canManage && isIssued && certificate.recipient_email && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleResendEmail}
+                disabled={isResending}
+                className="flex items-center gap-1.5"
+              >
+                <Mail className="w-4 h-4" />
+                <span>{isResending ? "Sending..." : "Resend Email"}</span>
+              </Button>
+            )}
 
             {canManage && isIssued && (
               <>

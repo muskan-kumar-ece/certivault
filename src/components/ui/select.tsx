@@ -47,7 +47,7 @@ export function Select({
       )}
 
       <RadixSelect.Root value={value} onValueChange={handleChange} disabled={disabled}>
-        <RadixSelect.Trigger className="w-full inline-flex items-center justify-between px-3.5 py-2.5 rounded-control bg-canvas border border-hairline text-ink text-sm outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+        <RadixSelect.Trigger className="w-full min-h-[44px] inline-flex items-center justify-between px-3.5 py-2.5 rounded-control bg-canvas border border-hairline text-ink text-sm outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
           <RadixSelect.Value placeholder={placeholder} />
           <RadixSelect.Icon className="text-ink-secondary">
             <ChevronDown className="w-4 h-4" />

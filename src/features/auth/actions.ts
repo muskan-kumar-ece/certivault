@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { checkAuthRateLimit } from "@/server/rate-limit";
 import { redirect } from "next/navigation";
 
 /**
@@ -9,6 +10,11 @@ import { redirect } from "next/navigation";
 export async function sendOtpAction(email: string) {
   if (!email || !email.includes("@")) {
     return { error: "Please enter a valid email address." };
+  }
+
+  const rateLimit = checkAuthRateLimit(email);
+  if (!rateLimit.allowed) {
+    return { error: "Too many authentication attempts. Please wait a minute before trying again." };
   }
 
   const supabase = await createClient();
@@ -33,6 +39,11 @@ export async function sendOtpAction(email: string) {
 export async function verifyOtpAction(email: string, token: string) {
   if (!email || !token) {
     return { error: "Email and verification code are required." };
+  }
+
+  const rateLimit = checkAuthRateLimit(email);
+  if (!rateLimit.allowed) {
+    return { error: "Too many attempts. Please wait a minute before trying again." };
   }
 
   const supabase = await createClient();

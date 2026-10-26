@@ -14,6 +14,7 @@ const config: Config = {
         canvas: "var(--canvas)",
         surface: "var(--surface)",
         "surface-raised": "var(--surface-raised)",
+        "surface-prominent": "var(--surface-raised)",
         ink: {
           DEFAULT: "var(--ink)",
           secondary: "var(--ink-secondary)",
@@ -31,6 +32,7 @@ const config: Config = {
           hover: "var(--accent-hover)",
         },
         seal: "var(--seal)",
+        verified: "var(--seal)",
         warning: "var(--warning)",
         danger: "var(--danger)",
       },

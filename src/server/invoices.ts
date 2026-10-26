@@ -62,16 +62,28 @@ export async function generateInvoicePdf(input: GenerateInvoiceInput): Promise<{
 
   const fy = getFinancialYear(new Date());
 
-  // 2. Generate sequential gapless invoice number via DB function
-  const { data: invNum, error: numErr } = await supabase.rpc("generate_invoice_number", {
-    _fy: fy,
-  });
+  // 2. Check if an invoice was already generated for this payment (idempotency & GST sequential integrity)
+  const { data: existingInvoice } = await supabase
+    .from("invoices")
+    .select("id, invoice_number, pdf_path")
+    .eq("payment_id", input.paymentId)
+    .maybeSingle();
 
-  if (numErr || !invNum) {
-    throw new Error(`Failed to generate sequential invoice number: ${numErr?.message}`);
+  let invoiceNumber: string;
+  if (existingInvoice) {
+    invoiceNumber = existingInvoice.invoice_number;
+  } else {
+    // Generate sequential gapless invoice number via DB function
+    const { data: invNum, error: numErr } = await supabase.rpc("generate_invoice_number", {
+      _fy: fy,
+    });
+
+    if (numErr || !invNum) {
+      throw new Error(`Failed to generate sequential invoice number: ${numErr?.message}`);
+    }
+    invoiceNumber = invNum as string;
   }
 
-  const invoiceNumber = invNum as string;
   const product = PRODUCTS[payment.product_code as ProductCode];
 
   // 3. Assemble Invoice PDF via pdf-lib
@@ -128,17 +140,31 @@ export async function generateInvoicePdf(input: GenerateInvoiceInput): Promise<{
   const totalRupees = (payment.amount_paise / 100).toFixed(2);
   const taxRupees = ((payment.amount_paise / 100) - Number(basePriceRupees)).toFixed(2);
 
+  const gstBreakdown = (payment.gst_breakdown as Record<string, number>) || {};
+  const cgstPaise = gstBreakdown.cgst_paise || gstBreakdown.cgstPaise || 0;
+  const sgstPaise = gstBreakdown.sgst_paise || gstBreakdown.sgstPaise || 0;
+  const igstPaise = gstBreakdown.igst_paise || gstBreakdown.igstPaise || 0;
+  const isIntraState = cgstPaise > 0 || sgstPaise > 0;
+
   page.drawText(product?.name || "Certificate Credits Package", { x: 60, y: itemY, size: 9, font });
   page.drawText("998313", { x: 280, y: itemY, size: 9, font });
-  page.drawText("18% GST", { x: 350, y: itemY, size: 9, font });
+  page.drawText(isIntraState ? "18% (CGST 9% + SGST 9%)" : "18% (IGST 18%)", { x: 350, y: itemY, size: 9, font });
   page.drawText(`Rs. ${basePriceRupees}`, { x: 440, y: itemY, size: 9, font });
 
-  // Totals Summary
+  // Totals Summary (Indian GST Act §31 statutory compliance)
   const summaryY = itemY - 60;
-  page.drawLine({ start: { x: 320, y: summaryY + 45 }, end: { x: 545, y: summaryY + 45 }, color: rgb(0.85, 0.85, 0.88) });
-  page.drawText(`Taxable Amount: Rs. ${basePriceRupees}`, { x: 350, y: summaryY + 30, size: 9, font });
-  page.drawText(`GST (18%): Rs. ${taxRupees}`, { x: 350, y: summaryY + 15, size: 9, font });
-  page.drawText(`Total Paid: Rs. ${totalRupees}`, { x: 350, y: summaryY - 2, size: 10, font: fontBold });
+  page.drawLine({ start: { x: 320, y: summaryY + 55 }, end: { x: 545, y: summaryY + 55 }, color: rgb(0.85, 0.85, 0.88) });
+  
+  if (isIntraState) {
+    page.drawText(`Taxable Amount: Rs. ${basePriceRupees}`, { x: 350, y: summaryY + 40, size: 9, font });
+    page.drawText(`CGST (9%): Rs. ${(cgstPaise / 100).toFixed(2)}`, { x: 350, y: summaryY + 26, size: 9, font });
+    page.drawText(`SGST (9%): Rs. ${(sgstPaise / 100).toFixed(2)}`, { x: 350, y: summaryY + 12, size: 9, font });
+    page.drawText(`Total Paid: Rs. ${totalRupees}`, { x: 350, y: summaryY - 3, size: 10, font: fontBold });
+  } else {
+    page.drawText(`Taxable Amount: Rs. ${basePriceRupees}`, { x: 350, y: summaryY + 30, size: 9, font });
+    page.drawText(`IGST (18%): Rs. ${(igstPaise > 0 ? (igstPaise / 100).toFixed(2) : taxRupees)}`, { x: 350, y: summaryY + 15, size: 9, font });
+    page.drawText(`Total Paid: Rs. ${totalRupees}`, { x: 350, y: summaryY - 2, size: 10, font: fontBold });
+  }
 
   // Footer Note
   page.drawText("This is a computer-generated tax invoice and requires no physical signature.", {
@@ -158,24 +184,28 @@ export async function generateInvoicePdf(input: GenerateInvoiceInput): Promise<{
     upsert: true,
   });
 
-  // 5. Insert invoice record
-  const { data: invRow, error: invErr } = await supabase
-    .from("invoices")
-    .insert({
-      org_id: input.orgId,
-      payment_id: input.paymentId,
-      invoice_number: invoiceNumber,
-      financial_year: fy,
-      pdf_path: storagePath,
-      amount_paise: payment.amount_paise,
-      tax_paise: Math.round(Number(taxRupees) * 100),
-      recipient_gstin: recipientGstin || null,
-    })
-    .select("id")
-    .single();
+  // 5. Insert invoice record (idempotent, skips if already created)
+  let invoiceId = existingInvoice?.id;
+  if (!existingInvoice) {
+    const { data: invRow, error: invErr } = await supabase
+      .from("invoices")
+      .insert({
+        org_id: input.orgId,
+        payment_id: input.paymentId,
+        invoice_number: invoiceNumber,
+        financial_year: fy,
+        pdf_path: storagePath,
+        amount_paise: payment.amount_paise,
+        tax_paise: Math.round(Number(taxRupees) * 100),
+        recipient_gstin: recipientGstin || null,
+      })
+      .select("id")
+      .single();
 
-  if (invErr || !invRow) {
-    throw new Error(`Failed to create invoice record: ${invErr?.message}`);
+    if (invErr || !invRow) {
+      throw new Error(`Failed to create invoice record: ${invErr?.message}`);
+    }
+    invoiceId = invRow.id;
   }
 
   // 6. Send invoice notification email to org contact
@@ -199,7 +229,7 @@ export async function generateInvoicePdf(input: GenerateInvoiceInput): Promise<{
   }
 
   return {
-    invoiceId: invRow.id,
+    invoiceId: invoiceId as string,
     invoiceNumber,
   };
 }

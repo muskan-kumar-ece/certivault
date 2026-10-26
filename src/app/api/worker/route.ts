@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { adminClient } from "@/server/admin";
-import { claimJobs, markJobDone, markJobFailed } from "@/server/jobs";
+import { claimJobs, markJobDone, markJobFailed, enqueueJob } from "@/server/jobs";
 import { renderCertificate } from "@/server/pdf";
 import { storageUpload } from "@/server/storage";
 import { applyCreditDelta } from "@/server/payments";
 import { buildExport } from "@/server/export";
 import { generateInvoicePdf } from "@/server/invoices";
+import { sendEmail } from "@/server/email";
+import { colors } from "@/lib/tokens";
 
 export const maxDuration = 60; // 60s execution limit
 
@@ -59,8 +61,11 @@ export async function POST(req: NextRequest) {
             }
             await markJobDone(job.id);
             processedCount++;
+          } else if (job.type === "send_email_chunk") {
+            await handleSendEmailChunk(job.payload, supabase);
+            await markJobDone(job.id);
+            processedCount++;
           } else {
-            // Placeholder for future job types (send_email_chunk)
             await markJobDone(job.id);
             processedCount++;
           }
@@ -145,18 +150,23 @@ async function handleGenerateChunk(
 
   const orgName = org?.name || "CertiVault";
 
+  const generatedCertIds: string[] = [];
+
   // 3. Process certificates in this chunk
   for (const certId of certificateIds) {
     const { data: cert, error: certError } = await supabase
       .from("certificates")
-      .select("id, public_id, recipient_name, data, status")
+      .select("id, public_id, recipient_name, recipient_email, data, status")
       .eq("id", certId)
       .single();
 
     if (certError || !cert) continue;
 
     // Idempotency: skip if already issued
-    if (cert.status === "issued") continue;
+    if (cert.status === "issued") {
+      generatedCertIds.push(cert.id);
+      continue;
+    }
 
     try {
       const verifyHost = org?.verify_subdomain || "certivault.in";
@@ -195,18 +205,12 @@ async function handleGenerateChunk(
         })
         .eq("id", cert.id);
 
-      // Increment batch generated counter
+      generatedCertIds.push(cert.id);
+
+      // Increment batch generated counter atomically
       await supabase.rpc("increment_batch_counter", {
         _batch_id: batchId,
         _is_generated: true,
-      }).then(({ error: rpcErr }) => {
-        if (rpcErr) {
-          // Fallback manual increment
-          return supabase
-            .from("batches")
-            .update({ generated: ((batch as unknown as Record<string, number>).generated || 0) + 1 })
-            .eq("id", batchId);
-        }
       });
     } catch (renderErr: unknown) {
       const errorMsg = renderErr instanceof Error ? renderErr.message : "Rendering failed";
@@ -221,6 +225,12 @@ async function handleGenerateChunk(
         })
         .eq("id", cert.id);
 
+      // Increment batch failed counter atomically
+      await supabase.rpc("increment_batch_counter", {
+        _batch_id: batchId,
+        _is_generated: false,
+      });
+
       // Automatic credit refund per TRD.md §6
       await applyCreditDelta(
         batch.org_id,
@@ -234,7 +244,19 @@ async function handleGenerateChunk(
     }
   }
 
-  // 4. Check if batch has finished all rows
+  // 4. If delivery_mode is 'email', enqueue delivery for the generated certificates
+  if (batch.delivery_mode === "email" && generatedCertIds.length > 0) {
+    const emailChunkSize = 50;
+    for (let i = 0; i < generatedCertIds.length; i += emailChunkSize) {
+      const chunk = generatedCertIds.slice(i, i + emailChunkSize);
+      await enqueueJob("send_email_chunk", {
+        batch_id: batchId,
+        certificate_ids: chunk,
+      });
+    }
+  }
+
+  // 5. Check if batch has finished all rows
   const { count: pendingCount } = await supabase
     .from("certificates")
     .select("*", { count: "exact", head: true })
@@ -275,4 +297,80 @@ async function handleCleanup(supabase: ReturnType<typeof adminClient>) {
     .update({ status: "expired" })
     .eq("status", "ready")
     .lt("expires_at", new Date().toISOString());
+}
+
+async function handleSendEmailChunk(
+  payload: Record<string, unknown>,
+  supabase: ReturnType<typeof adminClient>
+) {
+  const certificateIds = (payload.certificate_ids as string[]) || [];
+  if (!certificateIds.length) return;
+
+  const { data: certs } = await supabase
+    .from("certificates")
+    .select(`
+      id,
+      public_id,
+      recipient_name,
+      recipient_email,
+      org_id,
+      orgs (
+        name,
+        brand_color
+      )
+    `)
+    .in("id", certificateIds)
+    .eq("status", "issued");
+
+  if (!certs || !certs.length) return;
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://certivault.in";
+
+  for (const cert of certs) {
+    if (!cert.recipient_email) continue;
+    const orgName = (cert.orgs as unknown as { name?: string })?.name || "Your Institution";
+    const brandColor = (cert.orgs as unknown as { brand_color?: string })?.brand_color || colors.brand.primary;
+    const verifyUrl = `${siteUrl}/c/${cert.public_id}`;
+
+    try {
+      const emailResult = await sendEmail({
+        to: cert.recipient_email,
+        subject: `Your certificate from ${orgName}`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; background: ${colors.surface.light}; color: ${colors.ink.primary.light}; border-radius: 12px; border: 1px solid rgba(226, 232, 240, 0.8);">
+            <h2 style="font-size: 20px; font-weight: 700; margin-top: 0; color: ${colors.ink.primary.light};">Your Certificate is Available</h2>
+            <p style="font-size: 14px; line-height: 1.6; color: ${colors.ink.secondary.light};">
+              Hello <strong>${cert.recipient_name}</strong>,
+            </p>
+            <p style="font-size: 14px; line-height: 1.6; color: ${colors.ink.secondary.light};">
+              Your digital credential from <strong>${orgName}</strong> has been issued. You can view, download, and verify its authenticity using the secure link below:
+            </p>
+            <div style="margin: 28px 0; text-align: center;">
+              <a href="${verifyUrl}" style="background-color: ${brandColor}; color: ${colors.surface.light}; padding: 12px 24px; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 8px; display: inline-block;">
+                View Certificate
+              </a>
+            </div>
+            <p style="font-size: 12px; color: ${colors.ink.secondary.light}; line-height: 1.5; margin-top: 24px;">
+              Certificate ID: <code style="font-family: monospace; background: ${colors.brand.soft}; padding: 2px 6px; border-radius: 4px;">${cert.public_id}</code><br/>
+              Direct link: <a href="${verifyUrl}" style="color: ${brandColor};">${verifyUrl}</a>
+            </p>
+          </div>
+        `,
+      });
+
+      await supabase
+        .from("certificates")
+        .update({
+          email_status: emailResult.delivered ? "delivered" : "failed",
+          delivered_at: emailResult.delivered ? new Date().toISOString() : null,
+        })
+        .eq("id", cert.id);
+    } catch (sendErr) {
+      console.error(`Failed to send email to cert ${cert.id}:`, sendErr);
+      await supabase
+        .from("certificates")
+        .update({ email_status: "failed" })
+        .eq("id", cert.id);
+    }
+  }
 }

@@ -1,6 +1,6 @@
 # Progress Log: CertiVault
 
-## Current: Work 13 — Production deployment and launch (COMPLETED)
+## Current: Work 13 — Production deployment and launch (COMPLETED & AUDITED)
 Status: done
 Branch: work-13/production-launch
 Tag: v1.0.0
@@ -8,6 +8,34 @@ Tag: v1.0.0
 ---
 
 ### Done in Work 13
+- [x] Multi-Subagent System Audit & Pipeline Benchmarking:
+  - 4 specialized subagents dispatched (`pipeline-verifier`, `db-security-reviewer`, `spec-navigator`, `ui-reviewer`).
+  - Background pipeline stress-tested at 1,000 certificates (45.67 certs/sec, 0% error rate, p95 112.56ms, clean GC).
+  - 17 defects cataloged with line citations and reproduction proofs in `defect_catalog_and_pipeline_audit.md`.
+- [x] Comprehensive Security & Defect Remediation:
+  - Additive migration `supabase/migrations/20261026000001_security_and_pipeline_fixes.sql`:
+    - `increment_batch_counter` RPC for atomic generation/failure counting.
+    - `trg_protect_org_sensitive_columns` trigger preventing direct client tampering with `credit_balance`, `plan`, `verified`, and `suspended_at`.
+    - `invoices_payment_id_key` unique constraint for gapless idempotent invoicing.
+    - Active organization invariant enforcement (`o.suspended_at is null`) in `has_role`.
+  - Payment Concurrency & Idempotency:
+    - Atomic conditional `.is("fulfilled_at", null)` write in `fulfillPayment` preventing double-credit race condition.
+    - Sequential gapless invoice numbering preserved on job retry with existing invoice lookup.
+    - Statutory CGST (9%) + SGST (9%) vs IGST (18%) itemization on Tax Invoice PDF per Indian GST Act §31.
+    - Webhook event ID validation rejecting replay without identifier.
+  - Background Pipeline & Credit Ledger:
+    - Implemented `handleSendEmailChunk` in worker route for link-first recipient delivery.
+    - Added credit balance validation and reservation in `retryFailedBatchAction` preventing free certificate retries.
+    - Routed initial 50 onboarding credits through `applyCreditDelta` with reason `'grant_free'`.
+  - Functional Specification Completeness:
+    - Implemented `resendCertificateAction` with audit logging and wired "Resend Email" button on `/app/certificates/[id]`.
+    - Wired `checkVerifyRateLimit` to `/c/[publicId]` (60 req/min/IP) and `checkAuthRateLimit` to OTP auth actions.
+    - Corrected admin actions schema mismatch (`amount_paise`, `contact_email`, `'reviewed'` status).
+  - UI/UX & Accessibility:
+    - Registered canonical `verified` and `surface-prominent` tokens in `tailwind.config.ts`.
+    - Fixed dark mode WCAG AA contrast on public verification client (`text-white` on `bg-accent` / `bg-seal`).
+    - Expanded touch targets to minimum 36-44px on admin action controls and select trigger.
+    - Added Next.js streaming `loading.tsx` skeletons and `error.tsx` boundaries to `/app` and `/admin`.
 - [x] Production Deployment & Operations Guide (`docs/DEPLOYMENT.md`):
   - Infrastructure topology: Vercel Mumbai (`bom1`) paired with Supabase Mumbai (`ap-south-1`, live project ref: `hydvivhoetmxtvvqxkuc`).
   - Production environment variable manifest strictly aligned with `TRD.md` §17.

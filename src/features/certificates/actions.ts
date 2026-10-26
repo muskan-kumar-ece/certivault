@@ -6,6 +6,7 @@ import { requireRole, audit } from "@/server/auth";
 import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/server/admin";
 import { enqueueJob } from "@/server/jobs";
+import { applyCreditDelta } from "@/server/payments";
 import { renderCertificate } from "@/server/pdf";
 import { storageUpload, getSignedUrl } from "@/server/storage";
 import { exportKindSchema } from "@/server/export";
@@ -320,6 +321,19 @@ export async function retryFailedBatchAction(orgId: string, batchId: string) {
 
   const ids = failedCerts.map((c) => c.id);
 
+  // SEC-03 / DEF-04: Verify available credits and re-reserve them since failed certs were refunded
+  const { data: org } = await supabase
+    .from("orgs")
+    .select("credit_balance")
+    .eq("id", orgId)
+    .single();
+
+  if (!org || org.credit_balance < ids.length) {
+    throw new Error(`Insufficient credits to retry ${ids.length} certificates. You have ${org?.credit_balance ?? 0} credits.`);
+  }
+
+  await applyCreditDelta(orgId, -ids.length, "issue_reserve", "batch", batchId);
+
   // Reset certificates to pending
   await supabase
     .from("certificates")
@@ -348,4 +362,87 @@ export async function retryFailedBatchAction(orgId: string, batchId: string) {
 
   revalidatePath(`/app/certificates/batch/${batchId}`);
   return { count: ids.length, message: `Queued ${ids.length} certificates for retry.` };
+}
+
+export async function resendCertificateAction(orgId: string, certId: string) {
+  await requireRole(orgId, ["owner", "admin", "issuer"]);
+  const supabase = await createClient();
+
+  const { data: cert, error: fetchErr } = await supabase
+    .from("certificates")
+    .select(`
+      id,
+      public_id,
+      recipient_name,
+      recipient_email,
+      status,
+      org_id,
+      batch_id,
+      orgs (
+        name,
+        brand_color
+      )
+    `)
+    .eq("id", certId)
+    .eq("org_id", orgId)
+    .single();
+
+  if (fetchErr || !cert) {
+    throw new Error("Certificate not found.");
+  }
+
+  if (cert.status !== "issued") {
+    throw new Error(`Cannot resend certificate with status '${cert.status}'.`);
+  }
+
+  if (!cert.recipient_email) {
+    throw new Error("Certificate does not have a recipient email address.");
+  }
+
+  const orgName = (cert.orgs as unknown as { name?: string })?.name || "Your Institution";
+  const brandColor = (cert.orgs as unknown as { brand_color?: string })?.brand_color || colors.brand.primary;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://certivault.in";
+  const verifyUrl = `${siteUrl}/c/${cert.public_id}`;
+
+  const emailResult = await sendEmail({
+    to: cert.recipient_email,
+    subject: `Your certificate from ${orgName}`,
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; background: ${colors.surface.light}; color: ${colors.ink.primary.light}; border-radius: 12px; border: 1px solid rgba(226, 232, 240, 0.8);">
+        <h2 style="font-size: 20px; font-weight: 700; margin-top: 0; color: ${colors.ink.primary.light};">Your Certificate is Available</h2>
+        <p style="font-size: 14px; line-height: 1.6; color: ${colors.ink.secondary.light};">
+          Hello <strong>${cert.recipient_name}</strong>,
+        </p>
+        <p style="font-size: 14px; line-height: 1.6; color: ${colors.ink.secondary.light};">
+          Here is your digital credential from <strong>${orgName}</strong>. You can view, download, and verify its authenticity using the secure link below:
+        </p>
+        <div style="margin: 28px 0; text-align: center;">
+          <a href="${verifyUrl}" style="background-color: ${brandColor}; color: ${colors.surface.light}; padding: 12px 24px; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 8px; display: inline-block;">
+            View Certificate
+          </a>
+        </div>
+        <p style="font-size: 12px; color: ${colors.ink.secondary.light}; line-height: 1.5; margin-top: 24px;">
+          Certificate ID: <code style="font-family: monospace; background: ${colors.brand.soft}; padding: 2px 6px; border-radius: 4px;">${cert.public_id}</code><br/>
+          Direct link: <a href="${verifyUrl}" style="color: ${brandColor};">${verifyUrl}</a>
+        </p>
+      </div>
+    `,
+  });
+
+  await supabase
+    .from("certificates")
+    .update({
+      email_status: emailResult.delivered ? "delivered" : "failed",
+      delivered_at: emailResult.delivered ? new Date().toISOString() : null,
+    })
+    .eq("id", cert.id);
+
+  await audit(orgId, "certificate.resend", "certificate", cert.id, {
+    recipientEmail: cert.recipient_email,
+    publicId: cert.public_id,
+    success: emailResult.delivered,
+  });
+
+  revalidatePath(`/app/certificates/${certId}`);
+  return { success: emailResult.delivered, message: emailResult.delivered ? "Email resent successfully." : "Failed to deliver email." };
 }

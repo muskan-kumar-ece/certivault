@@ -3,6 +3,7 @@
 import { requireUser, audit } from "@/server/auth";
 import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/server/admin";
+import { applyCreditDelta } from "@/server/payments";
 import { createOrgSchema, CreateOrgInput } from "@/lib/schemas/org";
 import { revalidatePath } from "next/cache";
 
@@ -39,7 +40,7 @@ export async function createOrganizationAction(rawInput: CreateOrgInput) {
       slug,
       kind: input.kind,
       brand_color: input.brandColor,
-      credit_balance: 50, // Initial 50 free credits (PRD §10)
+      credit_balance: 0,
     })
     .select()
     .single();
@@ -65,7 +66,10 @@ export async function createOrganizationAction(rawInput: CreateOrgInput) {
     });
   }
 
-  // 5. Audit: Log the organization creation
+  // 5. Grant initial 50 free credits via apply_credit_delta (PRD §10, TRD §3)
+  await applyCreditDelta(org.id, 50, "grant_free", "org", org.id);
+
+  // 6. Audit: Log the organization creation
   await audit(org.id, "org.create", "org", org.id, {
     name: org.name,
     kind: org.kind,

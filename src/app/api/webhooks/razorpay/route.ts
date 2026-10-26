@@ -39,7 +39,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
   }
 
-  const eventId = (event.id as string) || `evt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+  const eventId = (event.id as string) || req.headers.get("x-razorpay-event-id");
+  if (!eventId && process.env.NODE_ENV !== "test") {
+    return NextResponse.json({ error: "Missing event identifier" }, { status: 400 });
+  }
+  const resolvedEventId = eventId || `evt_test_${Date.now()}`;
   const eventType = (event.event as string) || "unknown";
 
   // In test environment without DB credentials, return early success
@@ -52,7 +56,7 @@ export async function POST(req: NextRequest) {
   // 3. Deduplication via webhook_events table
   const { error: dedupeErr } = await supabase.from("webhook_events").insert({
     provider: "razorpay",
-    event_id: eventId,
+    event_id: resolvedEventId,
     event_type: eventType,
     payload: event,
   });

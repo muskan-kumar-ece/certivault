@@ -50,10 +50,10 @@ export async function getAdminStatsAction() {
   // 6. Total revenue in paise from paid payments
   const { data: paidPayments } = await admin
     .from("payments")
-    .select("amount")
+    .select("amount_paise")
     .eq("status", "paid");
 
-  const totalPaise = (paidPayments || []).reduce((acc, p) => acc + (p.amount || 0), 0);
+  const totalPaise = (paidPayments || []).reduce((acc, p) => acc + (p.amount_paise || 0), 0);
 
   return {
     totalOrgs: totalOrgs || 0,
@@ -263,8 +263,7 @@ export async function getAdminAbuseReportsAction() {
       public_id,
       reason,
       details,
-      reporter_email,
-      reporter_name,
+      contact_email,
       status,
       created_at
     `)
@@ -275,7 +274,18 @@ export async function getAdminAbuseReportsAction() {
     throw new Error(`Failed to load abuse reports: ${error.message}`);
   }
 
-  return reports || [];
+  return (reports || []).map((r) => ({
+    id: r.id,
+    certificate_id: r.certificate_id,
+    public_id: r.public_id,
+    reason: r.reason,
+    details: r.details,
+    contact_email: r.contact_email,
+    reporter_email: r.contact_email,
+    reporter_name: null,
+    status: r.status,
+    created_at: r.created_at,
+  }));
 }
 
 export async function resolveAbuseReportAction(rawInput: ResolveAbuseReportInput) {
@@ -305,7 +315,7 @@ export async function resolveAbuseReportAction(rawInput: ResolveAbuseReportInput
       .eq("id", report.certificate_id);
   }
 
-  const newStatus = input.action === "revoke" ? "resolved" : "dismissed";
+  const newStatus = input.action === "revoke" ? "reviewed" : "dismissed";
 
   const { error: updateError } = await admin
     .from("abuse_reports")
@@ -338,13 +348,12 @@ export async function getAdminPaymentsAction() {
       payment_id,
       order_id,
       org_id,
-      amount,
+      product_code,
+      amount_paise,
       currency,
-      cgst,
-      sgst,
-      igst,
       status,
-      billing,
+      gst_breakdown,
+      metadata,
       created_at,
       fulfilled_at,
       orgs (
@@ -360,5 +369,22 @@ export async function getAdminPaymentsAction() {
     throw new Error(`Failed to load payments: ${error.message}`);
   }
 
-  return payments || [];
+  return (payments || []).map((p) => {
+    const gst = (p.gst_breakdown as Record<string, number>) || {};
+    return {
+      id: p.id,
+      payment_id: p.payment_id,
+      order_id: p.order_id,
+      org_id: p.org_id,
+      amount: p.amount_paise,
+      currency: p.currency,
+      cgst: gst.cgst_paise || gst.cgstPaise || 0,
+      sgst: gst.sgst_paise || gst.sgstPaise || 0,
+      igst: gst.igst_paise || gst.igstPaise || 0,
+      status: p.status,
+      created_at: p.created_at,
+      fulfilled_at: p.fulfilled_at,
+      orgs: p.orgs,
+    };
+  });
 }

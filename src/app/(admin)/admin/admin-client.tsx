@@ -387,14 +387,14 @@ export function AdminClient({
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => setCreditModalOrg(org)}
-                          className="px-2 py-1 rounded-control border border-hairline bg-surface hover:bg-surface-raised text-[11px] font-medium text-ink press-feedback"
+                          className="min-h-[36px] px-2.5 py-1.5 rounded-control border border-hairline bg-surface hover:bg-surface-raised text-[11px] font-medium text-ink press-feedback"
                         >
                           Credits
                         </button>
 
                         <button
                           onClick={() => setSuspendModalOrg(org)}
-                          className={`px-2 py-1 rounded-control border text-[11px] font-medium press-feedback ${
+                          className={`min-h-[36px] px-2.5 py-1.5 rounded-control border text-[11px] font-medium press-feedback ${
                             org.suspended_at
                               ? "border-hairline bg-surface text-ink hover:bg-surface-raised"
                               : "border-hairline bg-surface text-accent hover:bg-surface-raised"
@@ -405,7 +405,7 @@ export function AdminClient({
 
                         <Link
                           href={`/admin/orgs/${org.id}`}
-                          className="p-1 rounded-control text-ink-secondary hover:text-ink hover:bg-surface-raised press-feedback"
+                          className="min-h-[36px] min-w-[36px] flex items-center justify-center p-1 rounded-control text-ink-secondary hover:text-ink hover:bg-surface-raised press-feedback"
                           title="View detail"
                         >
                           <ChevronRight className="w-4 h-4" />

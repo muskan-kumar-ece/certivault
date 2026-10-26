@@ -43,6 +43,7 @@ check("Database Migrations 1-9 Inventory", () => {
     "20261025000007_exports_and_revocation.sql",
     "20261025000008_payments_and_invoices.sql",
     "20261025000009_admin_and_verification.sql",
+    "20261026000001_security_and_pipeline_fixes.sql",
   ];
 
   for (const m of expectedMigrations) {

@@ -184,17 +184,24 @@ export async function fulfillPayment(orderId: string): Promise<{ fulfilled: bool
 
   const fulfilledAt = new Date().toISOString();
 
-  // 2. Mark payment paid and fulfilled
-  const { error: updateErr } = await supabase
+  // 2. Mark payment paid and fulfilled atomically with concurrency protection
+  const { data: updated, error: updateErr } = await supabase
     .from("payments")
     .update({
       status: "paid",
       fulfilled_at: fulfilledAt,
     })
-    .eq("id", payment.id);
+    .eq("id", payment.id)
+    .is("fulfilled_at", null)
+    .select("id");
 
   if (updateErr) {
     throw new Error(`Failed to update payment status: ${updateErr.message}`);
+  }
+
+  // If another concurrent thread (e.g. webhook vs redirect) fulfilled it first, return idempotently
+  if (!updated || updated.length === 0) {
+    return { fulfilled: true, alreadyFulfilled: true };
   }
 
   // 3. Grant credits atomically via applyCreditDelta

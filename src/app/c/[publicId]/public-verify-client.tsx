@@ -108,7 +108,7 @@ export function PublicVerifyClient({
         <div className="pt-4 border-t border-hairline">
           <a
             href="/verify"
-            className="inline-flex items-center justify-center gap-2 w-full h-11 rounded-control bg-accent text-surface text-sm font-semibold press-feedback"
+            className="inline-flex items-center justify-center gap-2 w-full h-11 rounded-control bg-accent text-white text-sm font-semibold press-feedback"
           >
             <Search className="w-4 h-4" />
             <span>Search or Scan Another ID</span>
@@ -179,9 +179,9 @@ export function PublicVerifyClient({
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: [0.8, 1.1, 1], opacity: 1 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              className="w-8 h-8 rounded-full bg-seal text-surface flex items-center justify-center shrink-0 shadow-sm"
+              className="w-8 h-8 rounded-full bg-seal text-white flex items-center justify-center shrink-0 shadow-sm"
             >
-              <CheckCircle className="w-5 h-5 text-surface" />
+              <CheckCircle className="w-5 h-5 text-white" />
             </motion.div>
             <div>
               <div className="text-sm font-bold text-seal flex items-center gap-1.5">
