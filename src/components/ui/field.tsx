@@ -40,6 +40,7 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(
           name={props.name || inputId}
           aria-invalid={!!error}
           aria-describedby={describedBy}
+          suppressHydrationWarning
           className={`w-full px-3.5 py-2.5 min-h-[44px] rounded-control bg-canvas border text-ink text-base placeholder:text-ink-secondary/60 outline-none transition-colors focus:ring-2 focus:ring-accent/20 focus:border-accent disabled:opacity-50 disabled:bg-surface-raised cursor-text ${
             error
               ? "border-danger focus:border-danger focus:ring-danger/20"

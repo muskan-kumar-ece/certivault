@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { sendOtpAction, verifyOtpAction } from "@/features/auth/actions";
 import { createClient } from "@/lib/supabase/browser";
@@ -15,6 +15,21 @@ export default function LoginPage() {
   const [step, setStep] = useState<"email" | "otp">("email");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const err = params.get("error");
+      const errDesc = params.get("error_description");
+      if (err) {
+        if (err === "auth_exchange_failed") {
+          setError("Authentication session exchange failed. Please request a new code or try again.");
+        } else {
+          setError(errDesc || `Authentication error: ${err}`);
+        }
+      }
+    }
+  }, []);
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,14 +63,22 @@ export default function LoginPage() {
   };
 
   const handleGoogleSignIn = async () => {
+    setError(null);
     try {
       const supabase = createClient();
-      await supabase.auth.signInWithOAuth({
+      const { error: oAuthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
+      if (oAuthError) {
+        if (oAuthError.message.toLowerCase().includes("not enabled") || oAuthError.message.toLowerCase().includes("validation_failed")) {
+          setError("Google Sign-In is not enabled in your Supabase project dashboard yet. Please sign in using Email OTP below or enable Google under Authentication → Providers.");
+        } else {
+          setError(oAuthError.message);
+        }
+      }
     } catch {
       setError("Google authentication could not be initialized.");
     }
