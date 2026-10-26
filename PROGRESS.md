@@ -36,6 +36,11 @@ Tag: v1.0.0
     - Fixed dark mode WCAG AA contrast on public verification client (`text-white` on `bg-accent` / `bg-seal`).
     - Expanded touch targets to minimum 36-44px on admin action controls and select trigger.
     - Added Next.js streaming `loading.tsx` skeletons and `error.tsx` boundaries to `/app` and `/admin`.
+- [x] Production Deployment & Custom Domain:
+  - Custom domain `certivault.venopai.in` verified and live on Vercel (`bom1`).
+  - Production environment variables (`NEXT_PUBLIC_APP_URL`, `VERIFY_BASE_URL`, `NEXT_PUBLIC_SITE_URL`) configured to `https://certivault.venopai.in`.
+  - Application metadata, OpenGraph, email templates, worker endpoints, and invoice branding updated across all files.
+  - Health check `https://certivault.venopai.in/api/health` and homepage returning HTTP 200 OK.
 - [x] Production Deployment & Operations Guide (`docs/DEPLOYMENT.md`):
   - Infrastructure topology: Vercel Mumbai (`bom1`) paired with Supabase Mumbai (`ap-south-1`, live project ref: `hydvivhoetmxtvvqxkuc`).
   - Production environment variable manifest strictly aligned with `TRD.md` §17.
