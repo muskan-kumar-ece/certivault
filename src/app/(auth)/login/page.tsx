@@ -36,13 +36,17 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
-    const res = await sendOtpAction(email);
-    setLoading(false);
-
-    if (res.error) {
-      setError(res.error);
-    } else {
-      setStep("otp");
+    try {
+      const res = await sendOtpAction(email);
+      if (res.error) {
+        setError(res.error);
+      } else {
+        setStep("otp");
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to send security code. Please check your connection.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,14 +55,18 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
-    const res = await verifyOtpAction(email, otp);
-    setLoading(false);
-
-    if (res.error) {
-      setError(res.error);
-    } else {
-      router.push("/app");
-      router.refresh();
+    try {
+      const res = await verifyOtpAction(email, otp);
+      if (res.error) {
+        setError(res.error);
+      } else {
+        router.push("/app");
+        router.refresh();
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Verification failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
