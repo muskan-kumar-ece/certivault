@@ -253,7 +253,7 @@ export async function renderTemplatePreviewAction(
       year: "numeric",
     }),
     id: "CV-26-87HKL2P9",
-    qr: "https://certivault.in/c/CV-26-87HKL2P9",
+    qr: `${process.env.VERIFY_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || "https://certivault.venopai.in"}/c/CV-26-87HKL2P9`,
     org_name: "IEEE Student Branch",
     signatory_name: "Dr. Lakshmi Rao",
     signatory_title: "Dean of Academic Affairs",

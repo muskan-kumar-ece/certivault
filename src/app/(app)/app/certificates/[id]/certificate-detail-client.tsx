@@ -97,7 +97,7 @@ export function CertificateDetailClientView({
   };
 
   const canManage = ["owner", "admin"].includes(userRole);
-  const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://certivault.in"}/c/${certificate.public_id}`;
+  const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://certivault.venopai.in"}/c/${certificate.public_id}`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(verifyUrl);

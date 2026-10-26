@@ -156,7 +156,7 @@ export async function inviteMemberAction(rawInput: InviteMemberInput) {
     .single();
 
   const orgName = org?.name || "CertiVault Organization";
-  const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://certivault.in"}/invite/${rawToken}`;
+  const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://certivault.venopai.in"}/invite/${rawToken}`;
 
   // 5. Send invitation email via sendEmail interface
   try {

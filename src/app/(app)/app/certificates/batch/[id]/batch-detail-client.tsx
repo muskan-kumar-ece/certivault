@@ -296,7 +296,7 @@ export function BatchDetailClientView({
             </thead>
             <tbody className="divide-y divide-hairline">
               {filteredCerts.map((cert) => {
-                const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://certivault.in"}/c/${cert.public_id}`;
+                const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://certivault.venopai.in"}/c/${cert.public_id}`;
 
                 return (
                   <tr key={cert.id} className="hover:bg-surface-prominent/50 transition-colors">

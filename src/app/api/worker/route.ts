@@ -169,7 +169,7 @@ async function handleGenerateChunk(
     }
 
     try {
-      const verifyHost = org?.verify_subdomain || "certivault.in";
+      const verifyHost = org?.verify_subdomain || process.env.VERIFY_BASE_URL?.replace(/^https?:\/\//, "") || "certivault.venopai.in";
       const verifyUrl = `https://${verifyHost}/c/${cert.public_id}`;
 
       // Assemble PDF inputs
@@ -324,7 +324,7 @@ async function handleSendEmailChunk(
 
   if (!certs || !certs.length) return;
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://certivault.in";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "https://certivault.venopai.in";
 
   for (const cert of certs) {
     if (!cert.recipient_email) continue;

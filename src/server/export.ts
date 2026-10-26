@@ -115,7 +115,7 @@ export async function buildExport(exportId: string): Promise<ExportResult> {
 
     const certificateList = certs || [];
     const parts: ExportPart[] = [];
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://certivault.in";
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://certivault.venopai.in";
 
     // 3. Process export by kind
     if (exp.kind === "report_csv") {

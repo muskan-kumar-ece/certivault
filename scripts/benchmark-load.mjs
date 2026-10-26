@@ -109,7 +109,7 @@ async function runLoadBenchmark() {
       chunkInputs.push({
         recipient_name: name,
         title: "National Student Innovation Summit 2026",
-        qr: `https://certivault.in/c/${publicId}`,
+        qr: `https://certivault.venopai.in/c/${publicId}`,
         id: publicId,
       });
     }

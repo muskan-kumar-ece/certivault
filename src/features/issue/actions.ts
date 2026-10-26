@@ -253,7 +253,7 @@ export async function issueBatchAction(rawInput: IssueBatchInput) {
   });
 
   // 7. Fire-and-forget worker trigger (best-effort self wakeup)
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://certivault.venopai.in";
   const workerSecret = process.env.WORKER_SECRET || "dev_secret";
   fetch(`${appUrl}/api/worker`, {
     method: "POST",
@@ -306,7 +306,8 @@ export async function sendTestCertificateAction(rawInput: SendTestCertificateInp
   }
 
   const testPublicId = newPublicId();
-  const verifyUrl = `https://certivault.in/c/${testPublicId}`;
+  const verifyBase = process.env.VERIFY_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || "https://certivault.venopai.in";
+  const verifyUrl = `${verifyBase}/c/${testPublicId}`;
 
   // Render PDF
   const tplSchema = template.schema as Record<string, unknown>;

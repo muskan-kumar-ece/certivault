@@ -445,7 +445,7 @@ export function CertificatesClientView({
                 <tbody className="divide-y divide-hairline">
                   {filteredCertificates.map((cert) => {
                     const isSelected = selectedCertIds.has(cert.id);
-                    const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://certivault.in"}/c/${cert.public_id}`;
+                    const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://certivault.venopai.in"}/c/${cert.public_id}`;
 
                     return (
                       <tr

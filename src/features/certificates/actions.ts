@@ -154,7 +154,7 @@ export async function correctCertificateAction(
   ];
 
   // 3. Re-render PDF with the same public ID
-  const verifyHost = org?.verify_subdomain || "certivault.in";
+  const verifyHost = org?.verify_subdomain || process.env.VERIFY_BASE_URL?.replace(/^https?:\/\//, "") || "certivault.venopai.in";
   const verifyUrl = `https://${verifyHost}/c/${cert.public_id}`;
   const mergedData = {
     ...((cert.data as Record<string, string>) || {}),
@@ -401,7 +401,7 @@ export async function resendCertificateAction(orgId: string, certId: string) {
 
   const orgName = (cert.orgs as unknown as { name?: string })?.name || "Your Institution";
   const brandColor = (cert.orgs as unknown as { brand_color?: string })?.brand_color || colors.brand.primary;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://certivault.in";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "https://certivault.venopai.in";
   const verifyUrl = `${siteUrl}/c/${cert.public_id}`;
 
   const emailResult = await sendEmail({

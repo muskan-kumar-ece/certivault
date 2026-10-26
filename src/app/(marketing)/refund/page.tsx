@@ -60,7 +60,7 @@ export default function RefundPage() {
 
           <h2 className="text-base font-semibold text-ink pt-4">4. How to Request a Refund</h2>
           <p>
-            To initiate a cancellation or refund, email <code>billing@certivault.in</code> from the organization owner&apos;s registered email address with the Order ID or Razorpay Payment ID. Approved refunds are credited to the original payment source within 5 to 7 Indian banking days.
+            To initiate a cancellation or refund, email <code>billing@certivault.venopai.in</code> from the organization owner&apos;s registered email address with the Order ID or Razorpay Payment ID. Approved refunds are credited to the original payment source within 5 to 7 Indian banking days.
           </p>
         </section>
       </div>

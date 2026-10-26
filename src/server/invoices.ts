@@ -98,7 +98,7 @@ export async function generateInvoicePdf(input: GenerateInvoiceInput): Promise<{
   page.drawText("TAX INVOICE", { x: 50, y: height - 60, size: 20, font: fontBold, color: rgb(0.11, 0.11, 0.12) });
   page.drawText("CertiVault Trust Technologies Pvt. Ltd.", { x: 50, y: height - 85, size: 10, font: fontBold });
   page.drawText("GSTIN: 27AAAAA0000A1Z5 · SAC: 998313 (IT Software & Design Services)", { x: 50, y: height - 100, size: 9, font });
-  page.drawText("State: Maharashtra (27) · support@certivault.in", { x: 50, y: height - 114, size: 9, font });
+  page.drawText("State: Maharashtra (27) · support@certivault.venopai.in", { x: 50, y: height - 114, size: 9, font });
 
   // Invoice Meta Box
   page.drawRectangle({

@@ -46,7 +46,7 @@ export default function PrivacyPage() {
 
           <h2 className="text-base font-semibold text-ink pt-4">5. Contact & Grievance Redressal</h2>
           <p>
-            In accordance with the Digital Personal Data Protection Act (DPDP Act 2023) and Information Technology Rules, our designated Grievance Officer can be contacted at <code>privacy@certivault.in</code>.
+            In accordance with the Digital Personal Data Protection Act (DPDP Act 2023) and Information Technology Rules, our designated Grievance Officer can be contacted at <code>privacy@certivault.venopai.in</code>.
           </p>
         </section>
       </div>

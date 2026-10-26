@@ -63,7 +63,7 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
 
   // 2. If Resend is configured, send through Resend API
   const resend = getResendClient();
-  const fromAddress = process.env.EMAIL_FROM || "CertiVault <certificates@mail.certivault.in>";
+  const fromAddress = process.env.EMAIL_FROM || "CertiVault <certificates@certivault.venopai.in>";
 
   if (resend && process.env.NODE_ENV !== "test") {
     try {

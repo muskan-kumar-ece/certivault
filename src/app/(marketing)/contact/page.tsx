@@ -32,10 +32,10 @@ export default function ContactPage() {
               For batch queries, credit assistance, and technical questions:
             </p>
             <a
-              href="mailto:support@certivault.in"
+              href="mailto:support@certivault.venopai.in"
               className="text-sm font-semibold text-accent hover:underline block"
             >
-              support@certivault.in
+              support@certivault.venopai.in
             </a>
           </div>
 
@@ -46,10 +46,10 @@ export default function ContactPage() {
               For institutional Campus pilots, GST POs, or custom university subdomains:
             </p>
             <a
-              href="mailto:institutions@certivault.in"
+              href="mailto:institutions@certivault.venopai.in"
               className="text-sm font-semibold text-accent hover:underline block"
             >
-              institutions@certivault.in
+              institutions@certivault.venopai.in
             </a>
           </div>
         </div>
@@ -71,7 +71,7 @@ export default function ContactPage() {
             <span>Abuse or Unauthorized Credentials</span>
           </h2>
           <p>
-            To report suspected fraudulent certificates or unauthorized use of college insignias, please use the &ldquo;Report Credential&rdquo; button on any public certificate verification page (<code>/c/[publicId]</code>) or email <code>trust@certivault.in</code>.
+            To report suspected fraudulent certificates or unauthorized use of college insignias, please use the &ldquo;Report Credential&rdquo; button on any public certificate verification page (<code>/c/[publicId]</code>) or email <code>trust@certivault.venopai.in</code>.
           </p>
         </section>
       </div>

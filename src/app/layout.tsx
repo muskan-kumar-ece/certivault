@@ -4,6 +4,7 @@ import { ToastProvider } from "@/components/ui/toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://certivault.venopai.in"),
   title: "CertiVault — Verifiable Certificates at Scale",
   description:
     "Issue 1,000 verified certificates in 5 minutes. Anyone can check them in 5 seconds.",

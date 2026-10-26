@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   CheckCircle,
@@ -281,13 +282,13 @@ export function PublicVerifyClient({
       {/* Footer Branding */}
       <div className="text-center mt-6 text-xs text-ink-secondary flex items-center justify-center gap-1.5">
         <span>Verified by</span>
-        <a
-          href="https://certivault.in"
+        <Link
+          href="/"
           className="font-semibold text-ink hover:underline inline-flex items-center gap-0.5"
         >
           <span>CertiVault</span>
           <ExternalLink className="w-3 h-3" />
-        </a>
+        </Link>
       </div>
 
       {/* Abuse Report Dialog */}

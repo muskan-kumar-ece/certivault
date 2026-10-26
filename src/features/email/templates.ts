@@ -63,7 +63,7 @@ export function renderCertificateDeliveryEmail({
       </div>
 
       <div style="max-width: 560px; margin: 20px auto 0 auto; text-align: center; font-size: 11px; color: ${colors.ink.secondary.light};">
-        Sent via <a href="https://certivault.in" style="color: ${colors.ink.secondary.light}; text-decoration: underline;">CertiVault</a> — Tamper-Proof Digital Credentials.
+        Sent via <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://certivault.venopai.in"}" style="color: ${colors.ink.secondary.light}; text-decoration: underline;">CertiVault</a> — Tamper-Proof Digital Credentials.
       </div>
     </body>
     </html>
